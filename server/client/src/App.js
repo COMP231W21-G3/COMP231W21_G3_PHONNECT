@@ -3,6 +3,7 @@ import NavBar from './components/Navbar';
 import "./App.css";
 import { BrowserRouter, Route, Switch, useHistory } from 'react-router-dom';
 import CreatePost from './components/screens/CreatePost';
+import VoiceCommand from './components/screens/VoiceCommand';
 
 export const UserContext = createContext();
 export const SocketContext=createContext();
@@ -13,6 +14,9 @@ const Routing = () => {
      
       <Route path="/createpost">
         <CreatePost />
+      </Route>
+      <Route path="/voicecommand">
+        <VoiceCommand />
       </Route>
     </Switch>
   )
