@@ -5,6 +5,8 @@ import { BrowserRouter, Route, Switch, useHistory } from 'react-router-dom';
 import CreatePost from './components/screens/CreatePost';
 import VoiceCommand from './components/screens/VoiceCommand';
 
+import Chatrooms from './components/screens/Chatrooms';
+
 export const UserContext = createContext();
 export const SocketContext=createContext();
 
@@ -17,6 +19,9 @@ const Routing = () => {
       </Route>
       <Route path="/voicecommand">
         <VoiceCommand />
+      </Route>
+      <Route path="/chatrooms">
+        <Chatrooms/>
       </Route>
     </Switch>
   )
