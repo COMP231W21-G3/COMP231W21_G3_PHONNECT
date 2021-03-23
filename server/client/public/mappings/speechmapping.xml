@@ -1,0 +1,57 @@
+<VOICEMAPPING>
+  <!-- FUNCTION specified by an action key and object key-->
+  <FUNCTION>
+    <FUNCTION_NAME>nav_chatrooms</FUNCTION_NAME>
+    <ACTION_KEY>nav</ACTION_KEY>
+    <OBJECT_KEY>chatroom</OBJECT_KEY>
+  </FUNCTION>  
+  <FUNCTION>
+    <FUNCTION_NAME>nav_feed</FUNCTION_NAME>
+    <ACTION_KEY>nav</ACTION_KEY>
+    <OBJECT_KEY>feed</OBJECT_KEY>
+  </FUNCTION>
+  <FUNCTION>
+    <FUNCTION_NAME>nav_profile</FUNCTION_NAME>
+    <ACTION_KEY>nav</ACTION_KEY>
+    <OBJECT_KEY>profile</OBJECT_KEY>
+  </FUNCTION>
+  <FUNCTION>
+    <FUNCTION_NAME>do_createpost</FUNCTION_NAME>
+    <ACTION_KEY>do</ACTION_KEY>
+    <OBJECT_KEY>post</OBJECT_KEY>
+  </FUNCTION>
+
+  <!-- ACTION - Verb - To do something-->
+  <ACTION>
+    <ACTION_ACTION_KEY>nav</ACTION_ACTION_KEY>
+    <ACTION_KEYWORDS>go~navigate~move~take</ACTION_KEYWORDS>
+  </ACTION>
+  <ACTION>
+    <ACTION_ACTION_KEY>do</ACTION_ACTION_KEY>
+    <ACTION_KEYWORDS>send~create</ACTION_KEYWORDS>
+  </ACTION>
+
+
+  <!-- OBJECTS - Noun - Destination - Physical -->
+  <OBJECT>
+    <OBJECT_OBJECT_KEY>message</OBJECT_OBJECT_KEY>
+    <OBJECT_KEYWORDS>message</OBJECT_KEYWORDS>
+  </OBJECT>
+  <OBJECT>
+    <OBJECT_OBJECT_KEY>chatroom</OBJECT_OBJECT_KEY>
+    <OBJECT_KEYWORDS>chatroom~chatrooms~groupchat~chats~chat</OBJECT_KEYWORDS>
+  </OBJECT>
+  <OBJECT>
+    <OBJECT_OBJECT_KEY>feed</OBJECT_OBJECT_KEY>
+    <OBJECT_KEYWORDS>feed~feeds</OBJECT_KEYWORDS>
+  </OBJECT>
+  <OBJECT>
+    <OBJECT_OBJECT_KEY>profile</OBJECT_OBJECT_KEY>
+    <OBJECT_KEYWORDS>profile</OBJECT_KEYWORDS>
+  </OBJECT>
+  <OBJECT>
+    <OBJECT_OBJECT_KEY>post</OBJECT_OBJECT_KEY>
+    <OBJECT_KEYWORDS>post</OBJECT_KEYWORDS>
+  </OBJECT>
+
+</VOICEMAPPING>

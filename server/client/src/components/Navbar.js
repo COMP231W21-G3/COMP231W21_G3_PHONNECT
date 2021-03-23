@@ -16,6 +16,7 @@ const NavBar = () => {
                     </ul>
                 </div>
             </nav>
+            <li><Link to="/voicecommand"><i className="small material-icons navbar-icons">add_circle_outline</i></Link></li>
         </>
     )
 }
