@@ -6,6 +6,7 @@ import CreatePost from './components/screens/CreatePost';
 import VoiceCommand from './components/screens/VoiceCommand';
 
 import Chatrooms from './components/screens/Chatrooms';
+import MeetAStranger from './components/screens/MeetAStranger';
 
 export const UserContext = createContext();
 export const SocketContext=createContext();
@@ -22,6 +23,9 @@ const Routing = () => {
       </Route>
       <Route path="/chatrooms">
         <Chatrooms/>
+      </Route>
+      <Route path="/meetastranger">
+        <MeetAStranger/>
       </Route>
     </Switch>
   )
