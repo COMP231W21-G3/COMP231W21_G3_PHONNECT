@@ -1,4 +1,6 @@
 import React, { Component, useEffect } from "react";
+import { Link } from 'react-router-dom';
+import M from 'materialize-css';
 //import { SpeechParser } from '../speechparser.js';
 //import { testSpeech } from '../speechparser.js';
 
@@ -213,8 +215,13 @@ function do_createpost() {
 
 
 class VoiceCommand extends Component {
+
     // Required to load after DOM
     componentDidMount() {
+        var taptargets = document.querySelectorAll('.tap-target');
+        var instances=M.TapTarget.init(taptargets, {});
+        instances[0].open();
+
         // DOM Elements
         var instruction = document.getElementById("instruction");
         var speechInput = document.getElementById("speechInput");
@@ -269,19 +276,33 @@ class VoiceCommand extends Component {
     startVoiceListener() {
         recognition.start();
     }
+    
+    openVoiceTab (){
+        var taptargets = document.querySelectorAll('.tap-target');
+        var instance = M.TapTarget.getInstance(taptargets[0]);
+        instance.open();
+    }
 
     // Render HTML
     render() {
         return (
 
             // <div className="App" ref={el => (this.div = el)}>
-            <div>
-                <h2>Voice Command</h2>
-                <p id="instruction">Press the play button to start voice command.</p>
-                <button id="startVoiceListener" onClick={this.startVoiceListener}>Test Speech Mapping</button>
-                <p>
-                    <span >Received Input: <b><span id="speechInput">Waiting for speech input...</span></b></span>
-                </p>
+            <div style={{textAlign:"right"}}>
+                <div className="tap-target #bbdefb blue lighten-4" data-target="menu">
+                    <div className="tap-target-content" >
+                        <h5>Voice</h5>
+                        <p id="instruction">Press the play button to start voice command.</p>
+                        <button id="startVoiceListener" onClick={this.startVoiceListener}>Test Speech Mapping</button>
+                        <p>
+                            <span >Received Input: <b><span id="speechInput">Waiting for speech input...</span></b></span>
+                        </p>
+                    </div>
+                </div>
+
+                <a id="menu" className="waves-effect waves-light btn btn-floating #1976d2 blue darken-1" onClick={this.openVoiceTab} style={{ position: 'fixed', bottom: "20px", right: "20px" }}>
+                    <i className="material-icons">keyboard_voice</i>
+                </a>
             </div>
         );
     }
