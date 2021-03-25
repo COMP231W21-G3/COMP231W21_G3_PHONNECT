@@ -18,9 +18,6 @@ const Routing = () => {
       <Route path="/createpost">
         <CreatePost />
       </Route>
-      <Route path="/voicecommand">
-        <VoiceCommand />
-      </Route>
       <Route path="/chatrooms">
         <Chatrooms/>
       </Route>
@@ -37,6 +34,7 @@ function App() {
       <SocketContext.Provider>
       <BrowserRouter>
         <NavBar />
+        <VoiceCommand/>
         <Routing />
       </BrowserRouter>
       </SocketContext.Provider>
