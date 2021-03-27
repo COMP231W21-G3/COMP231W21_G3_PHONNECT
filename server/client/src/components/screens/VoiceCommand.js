@@ -244,9 +244,9 @@ class SpeechFunction {
             case "do_createpost":
                 do_createpost();
                 break;
-            case "do_message":
-                do_message();
-                break;
+            // case "do_message":
+            //     do_message();
+            //     break;
             case "nav_stranger":
                 nav_stranger();
                 break;
@@ -260,8 +260,8 @@ class SpeechFunction {
 
 // Add Speech Functions Below. Try to keep consistent with speechmappings.
 function nav_chatrooms() {
-    console.log("Execute nav_chatrooms function");
-
+    readOutLoud ("Going to chatroom page");
+    window.location.href = "/chatrooms";
 }
 
 function nav_feed() {
@@ -269,22 +269,22 @@ function nav_feed() {
 }
 
 function nav_profile() {
-    //window.location.href="http://localhost:3000/"
-    console.log("Execute nav_profile function");
+    readOutLoud ("Going to profile page");
+    window.location.href = "/userprofile";
 }
 
 function do_createpost() {
     readOutLoud ("Going to content post page");
-    window.location.href = "http://localhost:3000/createpost";
+    window.location.href = "/createpost";
 }
 
-function do_message() {
-    console.log("Execute do _message")
-}
+// function do_message() {
+//     console.log("Execute do _message")
+// }
 
 function nav_stranger() {
     readOutLoud ("Going to meet a stranger page");
-    window.location.href = "http://localhost:3000/meetastranger";
+    window.location.href = "meetastranger";
 }
 
 
@@ -367,9 +367,18 @@ class VoiceCommand extends Component {
                     responseVoiceItems = responseVoiceItems.substring(0, or+1) + " or " + responseVoiceItems.substring(or);
                 }
 
-                var response = "I couldn't understand what you said. I heard the word \"" + resultFunction[2] + "\". Try saying: ";
+
+                if (resultFunction[2] == "") {
+                    var response = "I'm sorry. I do not understand that command.";
+                    readOutLoud(response);
+                }
+                else {
+                    var response = "I couldn't understand what you said. I heard the word \"" + resultFunction[2] + "\". Try saying: ";
+                    readOutLoud(response + responseVoiceItems);
+                }
+
                 suggestionIntro.innerHTML = response;
-                readOutLoud(response + responseVoiceItems);
+
 
             }
         }
@@ -389,7 +398,11 @@ class VoiceCommand extends Component {
 
     // Start Voice Listener
     startVoiceListener() {
-        recognition.start();
+        var instruction = document.getElementById("instruction");
+
+        if (instruction.innerText != "Voice recognition activated. Try speaking into the microphone.") {
+            recognition.start();
+        }
     }
 
     openVoiceTab() {
