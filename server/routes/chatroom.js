@@ -27,4 +27,58 @@ const openChatroomLive = (socket, io) => {
                 console.log(err);
             })
     })
+
+}
+
+router.post('/changeHobbies',requireLogin,(req,res)=>{
+    const {selectedHobbies}=req.body;
+
+    User.findByIdAndUpdate(req.user._id,{
+        hobbies:selectedHobbies
+    },{
+        new:true
+    })
+    .exec((err,user)=>{
+        if(err){
+            return res.status(422).json({ error: err });
+        }
+        else{
+            res.json({hobbies:user.hobbies});
+        }
+    })
+})
+
+router.post('/findMatch',requireLogin,(req,res)=>{
+    const {selectedHobbies}=req.body;
+
+    User.aggregate([
+        {
+            $match: {
+                hobbies: { $in: selectedHobbies },
+                _id: { $ne: req.user._id }
+            }
+        },
+        {
+            $set: {
+                matchedCount: {
+                    $size: {
+                        $setIntersection: ["$hobbies", selectedHobbies]
+                    }
+                }
+            }
+        },
+        {
+            $sort: {
+                matchedCount: -1
+            }
+        }
+    ], (err, matches) => {
+        if (err) {
+            return res.status(422).json({ error: err });
+        }
+        else {
+            res.json({ matches });
+        }
+    });
+})
 }
