@@ -7,6 +7,8 @@ const Chatroom = mongoose.model("Chatroom");
 const User = mongoose.model("User");
 const Chat = mongoose.model("Chat");
 
+
+
 const openChatroomLive = (socket, io) => {
     socket.on("open chatroom", chatroomId => {
         Chatroom.findOne({ _id: chatroomId })
@@ -81,4 +83,3 @@ router.post('/findMatch',requireLogin,(req,res)=>{
         }
     });
 })
-}
