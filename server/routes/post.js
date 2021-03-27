@@ -25,3 +25,25 @@ router.post('/createpost', requireLogin, (req, res) => {
             console.log(err);
         })
 });
+
+router.post('/getsubposts', requireLogin, (req, res) => {
+    let skip=parseInt(req.body.skip);
+    let limit=parseInt(req.body.limit);
+
+    Post.find({postedBy:{$in:[...req.user.following,req.user._id]}}) 
+        .skip(skip)
+        .limit(limit)
+        .populate("likes", "_id username profPic")
+        .populate("comments.postedBy", "_id username profPic")
+        .populate("postedBy", "_id username profPic")
+        .sort('-createdAt')
+        .then(posts => {
+            res.json({ 
+                posts,
+                postsSize:posts.length 
+            });
+        })
+        .catch(err => {
+            console.log(err);
+        })
+});
