@@ -82,3 +82,14 @@ router.get('/post/:postId', requireLogin, (req, res) => {
             console.log(err);
         })
 });
+
+router.get('/myposts', requireLogin, (req, res) => {
+    Post.find({ postedBy: req.user._id })
+        .populate("postedBy", "_id username")
+        .then(myposts => {
+            res.json({ myposts })
+        })
+        .catch(err => {
+            console.log(err);
+        })
+});
