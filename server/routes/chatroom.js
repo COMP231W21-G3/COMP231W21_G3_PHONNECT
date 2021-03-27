@@ -27,6 +27,7 @@ const openChatroomLive = (socket, io) => {
                 console.log(err);
             })
     })
+
 }
 
 router.post('/changeHobbies',requireLogin,(req,res)=>{
@@ -80,3 +81,4 @@ router.post('/findMatch',requireLogin,(req,res)=>{
         }
     });
 })
+}
