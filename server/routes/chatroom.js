@@ -6,8 +6,6 @@ const Chatroom = mongoose.model("Chatroom");
 const User = mongoose.model("User");
 const Chat = mongoose.model("Chat");
 
-<<<<<<< Updated upstream
-=======
 const createChatroomLive = (socket, io) => {
     socket.on("create chatroom", participants => {
         if (!participants || participants.length <= 1) {
@@ -36,7 +34,6 @@ const createChatroomLive = (socket, io) => {
     })
 }
 
->>>>>>> Stashed changes
 const openChatroomLive = (socket, io) => {
     socket.on("open chatroom", chatroomId => {
         Chatroom.findOne({ _id: chatroomId })
@@ -111,16 +108,7 @@ router.post('/findMatch',requireLogin,(req,res)=>{
         }
     });
 })
-<<<<<<< Updated upstream
-}
-=======
 
 module.exports = router;
 module.exports.createChatroomLive = createChatroomLive;
 module.exports.openChatroomLive = openChatroomLive;
-module.exports.addChatLive = addChatLive;
-module.exports.addParticipantsLive = addParticipantsLive;
-module.exports.removeParticipantLive = removeParticipantLive;
-module.exports.openVideoChatRoomLive = openVideoChatRoomLive;
-module.exports.closeVideoChatRoomLive = closeVideoChatRoomLive;
->>>>>>> Stashed changes

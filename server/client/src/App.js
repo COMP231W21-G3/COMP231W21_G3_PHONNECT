@@ -4,10 +4,11 @@ import "./App.css";
 import { BrowserRouter, Route, Switch, useHistory } from 'react-router-dom';
 import CreatePost from './components/screens/CreatePost';
 import VoiceCommand from './components/screens/VoiceCommand';
-
 import Chatrooms from './components/screens/Chatrooms';
 import MeetAStranger from './components/screens/MeetAStranger';
 import UserProfile from './components/screens/UserProfile';
+import { reducer, initialState } from './reducers/userReducer';
+import { socketReducer, socketInitialState } from './reducers/socketReducer';
 
 export const UserContext = createContext();
 export const SocketContext=createContext();
@@ -33,9 +34,12 @@ const Routing = () => {
 }
 
 function App() {
+  const [state, dispatch] = useReducer(reducer, initialState);
+  const [socketState, socketDispatch] = useReducer(socketReducer, socketInitialState);
+  
   return (
-    <UserContext.Provider>
-      <SocketContext.Provider>
+    <UserContext.Provider value={{ state, dispatch }}>
+      <SocketContext.Provider value={{ socketState, socketDispatch }}>
       <BrowserRouter>
         <NavBar />
         <VoiceCommand/>
