@@ -421,13 +421,10 @@ class VoiceCommand extends Component {
                     <div className="tap-target-content" >
                         <h5>Voice</h5>
                         <p id="instruction">Press the play button to start voice command.</p>
-
-                        <button id="startVoiceListener" onClick={this.startVoiceListener}>Test Speech Mapping</button>
                         <button id="startVoiceListener" onClick={this.startVoiceListener}
                         className="btn waves-effect waves-light #1976d2 blue darken-1"
                         >Start Microphone</button>
 
-                        <button id="startVoiceListener" onClick={this.startVoiceListener}>Start Microphone</button>
                         <p>
                             <span >Received Input: <b><span id="speechInput">Waiting for speech input...</span></b></span>
                         </p>
