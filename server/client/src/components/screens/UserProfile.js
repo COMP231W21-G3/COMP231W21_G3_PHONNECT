@@ -108,6 +108,49 @@ const UserProfile = () => {
     return (
         <div style={{ maxWidth: "600px", margin: "0px auto" }}>
 
+            <div id={`followersModal-${username}}`} className="modal modal-fixed-footer small-modal">
+                <div className="modal-content">
+                    <h4 className="styled-title">Followers</h4>
+                    <ul className="collection">
+                        {userProfile && userProfile.user.followers.length > 0 ?
+                            userProfile.user.followers.map((item) => {
+                                return <li key={item._id} className="collection-item avatar">
+                                    <Link to={item._id == state._id ? "/profile" : `/profile/${item.username}`}>
+                                        <img src={item.profPic} alt="" className="circle" />
+                                        <h6 style={{ fontWeight: "500" }} className="title">{item.username}</h6>
+                                    </Link>
+                                </li>
+                            })
+                            : null}
+                    </ul>
+                </div>
+                <div className="modal-footer">
+                    <a href="#!" className="modal-close btn-flat">Close</a>
+                </div>
+            </div>
+
+            <div id={`followingModal-${username}}`} className="modal modal-fixed-footer small-modal">
+                <div className="modal-content">
+                    <h4 className="styled-title">Following</h4>
+                    <ul className="collection">
+                        {userProfile && userProfile.user.following.length > 0 ?
+                            userProfile.user.following.map((item) => {
+                                return <li key={item._id} className="collection-item avatar">
+                                    <Link to={item._id == state._id ? "/profile" : `/profile/${item.username}`}>
+                                        <img src={item.profPic} alt="" className="circle" />
+                                        <h6 style={{ fontWeight: "500" }} className="title">{item.username}</h6>
+                                    </Link>
+                                </li>
+
+                            })
+                            : null}
+                    </ul>
+                </div>
+                <div className="modal-footer">
+                    <a href="#!" className="modal-close btn-flat">Close</a>
+                </div>
+            </div>
+
             {userProfile && state
                 ?
                 <>
@@ -150,6 +193,24 @@ const UserProfile = () => {
                             }
                         </div>
 
+                    </div>
+
+                    <div className="row" style={{ border: "solid lightgrey", borderWidth: "1px 0px", padding: "20px" }}>
+                        <div className="col s4" style={{ textAlign: "center" }}>
+                            <span style={{ fontWeight: "500" }}>{userProfile.posts.length}</span> posts
+                        </div>
+
+                        <div className="col s4" style={{ textAlign: "center" }}>
+                            <a className="modal-trigger" data-target={`followersModal-${username}}`} href="#!">
+                                <span style={{ fontWeight: "500" }}>{userProfile.user.followers ? userProfile.user.followers.length : "0"}</span> followers
+                            </a>
+                        </div>
+
+                        <div className="col s4" style={{ textAlign: "center" }}>
+                            <a className="modal-trigger" data-target={`followingModal-${username}}`} href="#!">
+                                <span style={{ fontWeight: "500" }}>{userProfile.user.following ? userProfile.user.following.length : "0"}</span> following
+                            </a>
+                        </div>
                     </div>
 
                     {userProfile.posts.length > 0 ?
