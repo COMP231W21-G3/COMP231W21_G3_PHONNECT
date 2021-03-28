@@ -1,4 +1,3 @@
-
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
@@ -7,7 +6,33 @@ const Chatroom = mongoose.model("Chatroom");
 const User = mongoose.model("User");
 const Chat = mongoose.model("Chat");
 
+const createChatroomLive = (socket, io) => {
+    socket.on("create chatroom", participants => {
+        if (!participants || participants.length <= 1) {
+            const error = "Select another participant!";
+            //send only to current socket
+            return socket.emit("create chatroom failed", error);
+        }
 
+        const chatroom = new Chatroom({
+            participants
+        })
+        chatroom.save()
+            .then(savedChatroom => {
+                Chatroom.findById(savedChatroom._id)
+                    .populate("participants", "_id username profPic")
+                    .then(chatroom => {
+                        //send to all sockets
+                        io.emit("create chatroom success",
+                            chatroom
+                        );
+                    })
+            })
+            .catch(err => {
+                console.log(err);
+            })
+    })
+}
 
 const openChatroomLive = (socket, io) => {
     socket.on("open chatroom", chatroomId => {
@@ -83,3 +108,7 @@ router.post('/findMatch',requireLogin,(req,res)=>{
         }
     });
 })
+
+module.exports = router;
+module.exports.createChatroomLive = createChatroomLive;
+module.exports.openChatroomLive = openChatroomLive;
