@@ -219,124 +219,6 @@ const Chatrooms = () => {
         setSearchAddParticipantsSelected(newList);
     }
 
-    const addParticipantsLive=()=>{
-        setLoading(true);
-        setOpenChatroomLoading(true);
-        
-        socket&&socket.emit("add participants",{
-            partisToAdd: searchAddParticipantsSelected,
-            chatroom: openedChatroom.chatroom,
-            currentUser:state
-        })
-    }
-
-    useEffect(() => {
-        socket&&socket.on("add participants failed", error => {
-            M.toast({ html: error, classes: "#c62828 red darken-1" });
-            setLoading(false);
-            setOpenChatroomLoading(false);
-        })
-
-        return () => socket&&socket.removeAllListeners("add participants failed");
-    })
-
-    useEffect(()=>{
-        socket&&socket.on("add participants success",chatroom=>{
-            if (rooms.filter(room => room._id === chatroom._id).length > 0) {
-                const newRooms = rooms.map(room => {
-                    if (room._id === chatroom._id) {
-                        return chatroom;
-                    }
-                    else {
-                        return room;
-                    }
-                })
-                setRooms(newRooms);
-                setLoading(false);
-            }
-            else {
-                if (chatroom.participants.filter(parti => parti._id === state._id).length > 0) {
-                    setRooms([...rooms, chatroom]);
-                }
-                setLoading(false);
-            }
-
-            if (openedChatroom && openedChatroom.chatroom && openedChatroom.chatroom._id === chatroom._id) {
-                console.log(chatroom);
-                setOpenedChatroom({ ...openedChatroom, chatroom });
-                setOpenChatroomLoading(false);
-
-                setSearchAddParticipantsSelected([]);
-                setSearchAddParticipant("");
-                setAddParticipantDetails([]);
-            }
-        })
-
-        return () => socket&&socket.removeAllListeners("add participants success");
-    })
-
-    const removeParticipantLive=(user)=>{
-        setLoading(true);
-        setOpenChatroomLoading(true);
-
-        socket&&socket.emit("remove participant",{
-            user,
-            chatroom: openedChatroom.chatroom,
-            currentUser:state
-        })
-    }
-
-    useEffect(()=>{
-        socket&&socket.on("remove participant success",chatroom=>{
-            if (rooms.filter(room => room._id === chatroom._id).length > 0) {
-                if(chatroom.participants.filter(parti=>parti._id===state._id).length>0){
-                    const newRooms = rooms.map(room => {
-                        if (room._id === chatroom._id) {
-                            return chatroom;
-                        }
-                        else {
-                            return room;
-                        }
-                    })
-                    setRooms(newRooms);
-                }
-                else{
-                    const newRooms = rooms.filter(room=>room._id!==chatroom._id);
-                    setRooms(newRooms);
-                }
-                
-                setLoading(false);
-            }
-            
-            if (openedChatroom && openedChatroom.chatroom && openedChatroom.chatroom._id === chatroom._id) {
-                console.log(chatroom);
-                if(chatroom.participants.filter(parti=>parti._id===state._id).length>0){
-                    setOpenedChatroom({ ...openedChatroom, chatroom });
-                    setOpenChatroomLoading(false);
-                }
-                else{
-                    setOpenedChatroom();
-                    setOpenChatroomLoading(false);
-                }
-
-                setSearchAddParticipantsSelected([]);
-                setSearchAddParticipant("");
-                setAddParticipantDetails([]);
-            }
-        })
-
-        return () => socket&&socket.removeAllListeners("remove participant success");
-    })
-
-
-    // const openVideoChatRoom = () => {
-    //     socket && socket.emit("open videochat room", { chatroom: openedChatroom.chatroom, currentUser: state });
-    // }
-
-    // const closeVideoChatRoom=()=>{
-    //     socket&&socket.emit("close videochat room",{chatroom:openedChatroom.chatroom,currentUser:state});
-    // }
-
     const selectHobby=(hobby)=>{
         setSelectedHobbies([...selectedHobbies, hobby]);
     }
@@ -564,87 +446,6 @@ const Chatrooms = () => {
                     <a className="modal-close btn-flat">Close</a>
                 </div>
             </div>
-
-            <div id="searchAddParticipantModal" className="modal modal-fixed-footer small-modal" ref={searchAddParticipantModal}>
-                <div className="modal-content">
-                    <h4 className="styled-title">Search Participants To Add</h4>
-
-                    <div style={{ display: "flex", flexWrap: "wrap" }}>
-                        {
-                            state && searchAddParticipantsSelected ?
-                                searchAddParticipantsSelected.map(item => {
-                                    return <div key={item._id} className="#bbdefb blue lighten-4 chip"
-                                        
-                                    >
-                                        {item.username}
-                                        {
-                                            item._id !== state._id &&
-                                            <i className="material-icons blue-text"
-                                                style={{ cursor: "pointer", fontSize: "18px", marginLeft: "5px", verticalAlign: "middle" }}
-                                                onClick={() => { removeSearchAddParticipantSelected(item) }}>cancel</i>
-                                        }
-
-                                    </div>
-                                })
-                                : <></>
-                        }
-                    </div>
-
-                    <input
-                        type="text"
-                        placeholder="search participants to add"
-                        value={searchAddParticipant}
-                        onChange={(e) => fetchSearchAddParticipants(e.target.value)}
-                    />
-
-                    <ul className="collection">
-                        {
-                            state ?
-                                addParticipantDetails.map(item => {
-                                    return (
-                                        !searchParticipantsSelected.some(a => a._id === item._id) ?
-                                            <li key={item._id} className="collection-item avatar" onClick={() => { addSearchAddParticipantsSelected(item) }} style={{ cursor: "pointer" }}>
-                                                <img src={item.profPic} alt="" className="circle" />
-                                                <h6 style={{ fontWeight: "500" }} className="title">{item.username}</h6>
-                                            </li>
-                                            :
-                                            <li key={item._id} className="collection-item avatar #bbdefb blue lighten-4" onClick={() => { removeSearchAddParticipantSelected(item) }} style={{ cursor: "pointer" }}>
-                                                <img src={item.profPic} alt="" className="circle" />
-                                                <h6 style={{ fontWeight: "500" }} className="title">{item.username}</h6>
-                                            </li>
-                                    )
-                                }) : null
-                        }
-                    </ul>
-                </div>
-                <div className="modal-footer">
-                    <a className="btn-flat blue-text"
-                        onClick={() =>
-                            loading && openChatroomLoading ?
-                                null :
-                                addParticipantsLive()}
-                                >
-                        Add Participant(s)</a>
-                    <a className="modal-close btn-flat">Close</a>
-                </div>
-            </div>
-
-            <div id="removeParticipantModal" className="modal modal-fixed-footer small-modal">
-                <div className="modal-content">
-                    <h4 className="styled-title">Remove Participant</h4>
-                    <p>Are you sure you want to remove this participant? </p>
-                    <p className="red-text">(Removing the last participant will result in deletion of the chatroom and its chats)</p>
-                </div>
-                <div className="modal-footer">
-                    <a href="#!" className="modal-close btn-flat red-text"
-                        onClick={() => {
-                            removeParticipantLive(participantToRemove);
-                            setParticipantToRemove({});
-                        }}
-                    >Remove Participant</a>
-                    <a className="modal-close btn-flat">Close</a>
-                </div>
-            </div>
             
             <div className="row" style={{ maxWidth: "800px", margin: "20px auto" }}>
                 <div className="col s12" style={{marginBottom:"10px"}}>
@@ -705,11 +506,7 @@ const Chatrooms = () => {
                                         openedChatroom && openedChatroom.chatroom ?
                                             <>
                                                 <div className="chatroom-title col s10">{openedChatroom.chatroom.participants.map(parti => parti.username).join(" ")}</div>
-                                                <i className="material-icons right col s1 activator" style={{ cursor: "pointer" }}>more_vert</i>
-                                                <Link target="_blank" to={`/videocall/${openedChatroom.chatroom._id}`}>
-                                                <i className="material-icons right col s1" 
-                                                >call</i>
-                                                </Link> 
+
                                             </>
                                             : "Ready to chat?"
                                     }
@@ -856,61 +653,7 @@ const Chatrooms = () => {
                             </div>
                         }
 
-                        {
-                            openedChatroom&&
-                            <div className="card-reveal">
-                            {
-                                openChatroomLoading ?
-                                    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%" }}>
-                                        <PreLoader />
-                                    </div> :
-                                    <>
-                                        <div style={{ marginBottom: "5px" }}>
-                                            <a className="btn-floating btn-large waves-effect waves-light #1976d2 blue darken-1 modal-trigger" data-target="searchAddParticipantModal"
-                                                style={{ width: "40px", height: "40px" }}>
-                                                <i className="material-icons"
-                                                    style={{ lineHeight: "40px" }}
-                                                >group_add</i></a>
-                                                
-
-                                            <i className="material-icons right card-title">close</i>
-                                        </div>
-
-                                        <span style={{ fontSize: "24px", fontWeight: "300" }}>Participants</span>
-
-
-
-                                        {openedChatroom && openedChatroom.chatroom &&
-                                            <ul className="collection">
-                                                {
-                                                    openedChatroom.chatroom.participants.map((record) => {
-                                                        return (
-
-                                                            <li key={record._id} className="collection-item avatar">
-
-                                                                <Link to={record._id == state._id ? "/profile" : `/profile/${record.username}`}>
-                                                                    <img src={record.profPic} alt="" className="circle" style={{ objectFit: "cover" }} />
-                                                                    <h6 style={{ fontWeight: "500" }} className="title">  {record.username}</h6></Link>
-
-                                                                <a className="secondary-content btn-floating btn-large waves-effect waves-light #ef5350 red lighten-1 modal-trigger"
-                                                                    data-target="removeParticipantModal"
-                                                                    style={{ width: "40px", height: "40px" }}>
-                                                                    <i className="material-icons"
-                                                                        style={{ lineHeight: "40px" }}
-                                                                        onClick={() => {
-                                                                            setParticipantToRemove(record);
-                                                                        }}
-                                                                    >remove</i></a>
-                                                            </li>
-                                                        )
-                                                    })
-                                                }
-                                            </ul>
-                                        }
-                                    </>
-                            }
-
-                        </div>}
+                        
                     </div>
                 </div>
             </div>

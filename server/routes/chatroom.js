@@ -6,6 +6,24 @@ const Chatroom = mongoose.model("Chatroom");
 const User = mongoose.model("User");
 const Chat = mongoose.model("Chat");
 
+router.get('/chatrooms', requireLogin, (req, res) => {
+    Chatroom.find({ participants: req.user._id })
+        .populate("participants", "_id username profPic")
+        .then(chatrooms => {
+            res.json({
+                chatrooms,
+                currentUser: {
+                    _id: req.user._id,
+                    username: req.user.username,
+                    profPic: req.user.profPic
+                }
+            });
+        })
+        .catch(err => {
+            console.log(err);
+        })
+});
+
 const createChatroomLive = (socket, io) => {
     socket.on("create chatroom", participants => {
         if (!participants || participants.length <= 1) {
@@ -35,27 +53,91 @@ const createChatroomLive = (socket, io) => {
 }
 
 const openChatroomLive = (socket, io) => {
-    socket.on("open chatroom", chatroomId => {
-        Chatroom.findOne({ _id: chatroomId })
+    socket.on("open chatroom", data => {
+        const {chatroomId,currentUserId}=data;
+        Chatroom.findOneAndUpdate({ _id: chatroomId },{
+            $addToSet: { lastSeenBy:currentUserId}
+        }, {
+            new: true
+        })
             .populate("participants", "_id username profPic")
-            .then(chatroom => {
-                Chat.find({ inChatRoom: chatroomId })
+            .exec((err,chatroom) => {
+                if(err){
+                    console.log(err);
+                }
+                else{
+                    Chat.find({ inChatRoom: chatroomId })
                     .populate("sender", "_id username profPic")
                     .then(chats => {
-                        socket.leave(socket.room);
+                        socket.leaveAll();
                         socket.join(chatroomId);
                         socket.emit("open chatroom success", { chatroom, chats });
                     })
                     .catch(err => {
                         console.log(err);
                     })
+                }
+            })
+    })
+}
+
+const addChatLive = (socket, io) => {
+    socket.on("add chat", data => {
+        const { message, image, sender, inChatRoom } = data;
+
+        // console.log(io.sockets.adapter.rooms.get(inChatRoom._id));
+        // console.log(io.sockets.adapter.rooms.get(inChatRoom._id).has(socket.id));
+
+        const chat = new Chat({
+            message,
+            image,
+            sender,
+            inChatRoom
+        })
+        chat.save()
+            .then(savedChat => {
+                Chat.findById(savedChat._id)
+                    .populate("sender", "_id username profPic")
+                    .then(chat => {
+                        Chatroom.findByIdAndUpdate(inChatRoom._id,{
+                              lastSeenBy: [sender] 
+                        }, {
+                            new: true
+                        })
+                        .exec((err, result) => {
+                            if (err) {
+                                
+                            }
+                            else {
+                                io.sockets.in(inChatRoom._id).emit("add chat success",
+                                    chat
+                                );
+                            }
+                        })
+                    })
             })
             .catch(err => {
                 console.log(err);
             })
     })
-
 }
+
+router.post('/search-participants', requireLogin, (req, res) => {
+    let userPattern = new RegExp("^" + req.body.query);
+    if (req.body.query !== "") {
+        User.find({ username: { $regex: userPattern }, _id: { $ne: req.user._id } })
+            .select("_id username profPic")
+            .then(searched_partis => {
+                res.json({ searched_partis })
+            })
+            .catch(err => {
+                console.log(err);
+            })
+    }
+    else {
+        res.json({ searched_partis: [] });
+    }
+})
 
 router.post('/changeHobbies',requireLogin,(req,res)=>{
     const {selectedHobbies}=req.body;
@@ -112,3 +194,5 @@ router.post('/findMatch',requireLogin,(req,res)=>{
 module.exports = router;
 module.exports.createChatroomLive = createChatroomLive;
 module.exports.openChatroomLive = openChatroomLive;
+module.exports.addChatLive = addChatLive;
+

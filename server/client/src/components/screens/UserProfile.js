@@ -9,6 +9,7 @@ const UserProfile = () => {
     const [userProfile, setProfile] = useState(null);
     const { state, dispatch } = useContext(UserContext);
     const { username } = useParams();
+    const [followLoading, setFollowLoading] = useState(false);
 
     useEffect(() => {
         var elems = document.querySelectorAll('.modal');
@@ -42,51 +43,70 @@ const UserProfile = () => {
         fetchUserProfile();
     }, [username])
 
+    const followUser = () => {
+        setFollowLoading(true);
+        fetch('/follow', {
+            method: "put",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + localStorage.getItem("jwt")
+            },
+            body: JSON.stringify({
+                followId: userProfile.user._id
+            })
+        })
+            .then(res => res.json())
+            .then(result => {
+                console.log(result);
+                dispatch({ type: "UPDATE", payload: { following: result.following, followers: result.followers } });
+                localStorage.setItem("user", JSON.stringify(result));
+                setProfile(prevState => {
+                    return {
+                        ...prevState,
+                        user: {
+                            ...prevState.user,
+                            followers: [...prevState.user.followers, result._id]
+                        }
+                    }
+                })
+                setFollowLoading(false);
+            })
+    }
+
+    const unfollowUser = () => {
+        setFollowLoading(true);
+        fetch('/unfollow', {
+            method: "put",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + localStorage.getItem("jwt")
+            },
+            body: JSON.stringify({
+                unfollowId: userProfile.user._id
+            })
+        })
+            .then(res => res.json())
+            .then(result => {
+
+                console.log(result);
+                dispatch({ type: "UPDATE", payload: { following: result.following, followers: result.followers } });
+                localStorage.setItem("user", JSON.stringify(result));
+                setProfile(prevState => {
+                    const newFollowers = prevState.user.followers.filter(item => item._id !== result._id);
+                    return {
+                        ...prevState,
+                        user: {
+                            ...prevState.user,
+                            followers: newFollowers
+                        }
+                    }
+                })
+                setFollowLoading(false);
+            })
+    }
+
     return (
         <div style={{ maxWidth: "600px", margin: "0px auto" }}>
-
-            <div id={`followersModal-${username}}`} className="modal modal-fixed-footer small-modal">
-                <div className="modal-content">
-                    <h4 className="styled-title">Followers</h4>
-                    <ul className="collection">
-                        {userProfile && userProfile.user.followers.length > 0 ?
-                            userProfile.user.followers.map((item) => {
-                                return <li key={item._id} className="collection-item avatar">
-                                    <Link to={item._id == state._id ? "/profile" : `/profile/${item.username}`}>
-                                        <img src={item.profPic} alt="" className="circle" />
-                                        <h6 style={{ fontWeight: "500" }} className="title">{item.username}</h6>
-                                    </Link>
-                                </li>
-                            })
-                            : null}
-                    </ul>
-                </div>
-                <div className="modal-footer">
-                    <a href="#!" className="modal-close btn-flat">Close</a>
-                </div>
-            </div>
-
-            <div id={`followingModal-${username}}`} className="modal modal-fixed-footer small-modal">
-                <div className="modal-content">
-                    <h4 className="styled-title">Following</h4>
-                    <ul className="collection">
-                        {userProfile && userProfile.user.following.length > 0 ?
-                            userProfile.user.following.map((item) => {
-                                return <li key={item._id} className="collection-item avatar">
-                                    <Link to={item._id == state._id ? "/profile" : `/profile/${item.username}`}>
-                                        <img src={item.profPic} alt="" className="circle" />
-                                        <h6 style={{ fontWeight: "500" }} className="title">{item.username}</h6>
-                                    </Link>
-                                </li>
-
-                            })
-                            : null}
-                    </ul>
-                </div>
-                <div className="modal-footer">
-                    <a href="#!" className="modal-close btn-flat">Close</a>
-                </div>
-            </div>
 
             {userProfile && state
                 ?
@@ -103,24 +123,33 @@ const UserProfile = () => {
                                 {userProfile.user.username}</h4>
                         </div>
 
-                    </div>
-
-                    <div className="row" style={{ border: "solid lightgrey", borderWidth: "1px 0px", padding: "20px" }}>
-                        <div className="col s4" style={{ textAlign: "center" }}>
-                            <span style={{ fontWeight: "500" }}>{userProfile.posts.length}</span> posts
+                        <div className="col s9"
+                            style={{ display: "flex", justifyContent: "center", margin: "10px auto" }}>
+                            {
+                                followLoading ?
+                                    <div className="preloader-wrapper small active">
+                                        <div className="spinner-layer spinner-blue-only">
+                                            <div className="circle-clipper left">
+                                                <div className="circle"></div>
+                                            </div><div className="gap-patch">
+                                                <div className="circle"></div>
+                                            </div><div className="circle-clipper right">
+                                                <div className="circle"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    :
+                                    !state.following || (state.following && !state.following.some(user => user._id === userProfile.user._id)) ?
+                                        <button className="btn waves-effect waves-light #1976d2 blue darken-1"
+                                            onClick={() => followUser()}>
+                                            Follow</button>
+                                        :
+                                        <button className="btn waves-effect waves-light #ef5350 red lighten-1"
+                                            onClick={() => unfollowUser()}>
+                                            Unfollow</button>
+                            }
                         </div>
 
-                        <div className="col s4" style={{ textAlign: "center" }}>
-                            <a className="modal-trigger" data-target={`followersModal-${username}}`} href="#!">
-                                <span style={{ fontWeight: "500" }}>{userProfile.user.followers ? userProfile.user.followers.length : "0"}</span> followers
-                            </a>
-                        </div>
-
-                        <div className="col s4" style={{ textAlign: "center" }}>
-                            <a className="modal-trigger" data-target={`followingModal-${username}}`} href="#!">
-                                <span style={{ fontWeight: "500" }}>{userProfile.user.following ? userProfile.user.following.length : "0"}</span> following
-                            </a>
-                        </div>
                     </div>
 
                     {userProfile.posts.length > 0 ?

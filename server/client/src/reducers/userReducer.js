@@ -20,5 +20,11 @@ export const reducer=(state,action)=>{
             profPic:action.payload
         }
     }
+    if(action.type==="UPDATEHOBBIES"){
+        return{
+            ...state,
+            hobbies:action.payload
+        }
+    }
     return state;
 } 

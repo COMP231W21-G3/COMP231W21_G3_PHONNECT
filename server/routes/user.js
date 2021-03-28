@@ -72,33 +72,4 @@ router.put('/unfollow', requireLogin, (req, res) => {
     })
 })
 
-router.put('/updateprofpic', requireLogin, (req, res) => {
-    User.findByIdAndUpdate(req.user._id,
-        { $set: { profPic: req.body.profPic } },
-        { new: true },
-        (err, result) => {
-            if (err) {
-                return res.status(422).json({ error: "Cannot update profile pic!" })
-            }
-            res.json(result);
-        })
-})
-
-router.post('/search-users', requireLogin, (req, res) => {
-    let userPattern = new RegExp("^" + req.body.query);
-    if (req.body.query !== "") {
-        User.find({ username: { $regex: userPattern } })
-            .select("_id username profPic")
-            .then(users => {
-                res.json({ users })
-            })
-            .catch(err => {
-                console.log(err);
-            })
-    }
-    else{
-        res.json({users:[]});
-    }
-})
-
 module.exports = router;
