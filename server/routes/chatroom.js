@@ -1,4 +1,3 @@
-
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
@@ -7,6 +6,37 @@ const Chatroom = mongoose.model("Chatroom");
 const User = mongoose.model("User");
 const Chat = mongoose.model("Chat");
 
+<<<<<<< Updated upstream
+=======
+const createChatroomLive = (socket, io) => {
+    socket.on("create chatroom", participants => {
+        if (!participants || participants.length <= 1) {
+            const error = "Select another participant!";
+            //send only to current socket
+            return socket.emit("create chatroom failed", error);
+        }
+
+        const chatroom = new Chatroom({
+            participants
+        })
+        chatroom.save()
+            .then(savedChatroom => {
+                Chatroom.findById(savedChatroom._id)
+                    .populate("participants", "_id username profPic")
+                    .then(chatroom => {
+                        //send to all sockets
+                        io.emit("create chatroom success",
+                            chatroom
+                        );
+                    })
+            })
+            .catch(err => {
+                console.log(err);
+            })
+    })
+}
+
+>>>>>>> Stashed changes
 const openChatroomLive = (socket, io) => {
     socket.on("open chatroom", chatroomId => {
         Chatroom.findOne({ _id: chatroomId })
@@ -81,4 +111,16 @@ router.post('/findMatch',requireLogin,(req,res)=>{
         }
     });
 })
+<<<<<<< Updated upstream
 }
+=======
+
+module.exports = router;
+module.exports.createChatroomLive = createChatroomLive;
+module.exports.openChatroomLive = openChatroomLive;
+module.exports.addChatLive = addChatLive;
+module.exports.addParticipantsLive = addParticipantsLive;
+module.exports.removeParticipantLive = removeParticipantLive;
+module.exports.openVideoChatRoomLive = openVideoChatRoomLive;
+module.exports.closeVideoChatRoomLive = closeVideoChatRoomLive;
+>>>>>>> Stashed changes
