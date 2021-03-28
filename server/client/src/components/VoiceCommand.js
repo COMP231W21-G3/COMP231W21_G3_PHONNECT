@@ -424,7 +424,6 @@ class VoiceCommand extends Component {
                         <button id="startVoiceListener" onClick={this.startVoiceListener}
                         className="btn waves-effect waves-light #1976d2 blue darken-1"
                         >Start Microphone</button>
-
                         <p>
                             <span >Received Input: <b><span id="speechInput">Waiting for speech input...</span></b></span>
                         </p>

@@ -5,13 +5,13 @@ import { UserContext } from '../../App';
 import M from 'materialize-css';
 import { Link } from 'react-router-dom';
 
-const Home = () => {
+const AllPosts = () => {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(false);
     const { state, dispatch } = useContext(UserContext);
     const [skip, setSkip] = useState(0);
     const [limit, setLimit] = useState(4);
-    const [postsSize, setPostsSize] = useState(0);
+    const [postsSize,setPostsSize]=useState(0);
 
     useEffect(() => {
         setLoading(true);
@@ -19,7 +19,7 @@ const Home = () => {
     }, [])
 
     const getPosts = (variables) => {
-        fetch('/getsubposts', {
+        fetch('/allposts', {
             method: "post",
             headers: {
                 "Content-Type": "application/json",
@@ -70,22 +70,23 @@ const Home = () => {
                                         <CarouselSlider item={item} />
 
                                         <p><span style={{ fontWeight: "500" }}>{item.postedBy.username}</span> {item.caption}</p>
-   
+                  
 
                                     </div>
                                     <div className="card-reveal">
-                                        <span className="card-title">Options<i className="material-icons right">close</i></span>                                      
+                                        <span className="card-title">Options<i className="material-icons right">close</i></span>
+                                
                                     </div>
                                 </div>
                             )
                         })}
-                        {postsSize >= limit &&
-                            <div style={{ margin: "30px auto", width: "fit-content" }}>
-                                <button className="btn waves-effect waves-light #1976d2 blue darken-1"
-                                    onClick={() => onLoadMore()}>
-                                    Load More
+                        {postsSize>=limit&&
+                        <div style={{ margin: "30px auto", width: "fit-content" }}>
+                            <button className="btn waves-effect waves-light #1976d2 blue darken-1"
+                                onClick={() => onLoadMore()}>
+                                Load More
                             </button>
-                            </div>}
+                        </div>}
                     </>
                     : <h5 style={{ display: "flex", justifyContent: "center", color: "gray", margin: "50px" }}>No posts on your feed!</h5>
             }
@@ -93,4 +94,4 @@ const Home = () => {
     )
 }
 
-export default Home
+export default AllPosts
