@@ -47,3 +47,49 @@ router.post('/getsubposts', requireLogin, (req, res) => {
             console.log(err);
         })
 });
+
+router.post('/allposts', requireLogin, (req, res) => {
+    let skip=parseInt(req.body.skip);
+    let limit=parseInt(req.body.limit);
+
+    Post.find() 
+        .skip(skip)
+        .limit(limit)
+        .populate("likes", "_id username profPic")
+        .populate("comments.postedBy", "_id username profPic")
+        .populate("postedBy", "_id username profPic")
+        .sort('-createdAt')
+        .then(posts => {
+            res.json({ 
+                posts,
+                postsSize:posts.length
+            });
+        })
+        .catch(err => {
+            console.log(err);
+    })
+});
+
+router.get('/post/:postId', requireLogin, (req, res) => {
+    Post.findOne({_id:req.params.postId}) 
+        .populate("likes", "_id username profPic")
+        .populate("comments.postedBy", "_id username profPic")
+        .populate("postedBy", "_id username profPic")
+        .then(post => {
+            res.json({ post });
+        })
+        .catch(err => {
+            console.log(err);
+        })
+});
+
+router.get('/myposts', requireLogin, (req, res) => {
+    Post.find({ postedBy: req.user._id })
+        .populate("postedBy", "_id username")
+        .then(myposts => {
+            res.json({ myposts })
+        })
+        .catch(err => {
+            console.log(err);
+        })
+});
