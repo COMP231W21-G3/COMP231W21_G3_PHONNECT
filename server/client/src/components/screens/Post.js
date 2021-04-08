@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import CarouselSlider from '../CarouselSlider';
-import HomePostOptions from '../HomePostOptions';
-import PreLoader from '../Preloader'; 
+import PreLoader from '../Preloader';
 import { UserContext } from '../../App';
 import M from 'materialize-css';
 import { Link, useHistory, useParams } from 'react-router-dom';
@@ -26,11 +25,11 @@ const Post = () => {
             })
     }, [])
 
-
     return (
         <div className="home">
 
             {data ?
+
 
                 <div className="card home-card" key={data._id}>
                     <div className="card-content">
@@ -44,8 +43,10 @@ const Post = () => {
 
                         <CarouselSlider item={data} />
 
+                       
 
                         <p><span style={{ fontWeight: "500" }}>{data.postedBy.username}</span> {data.caption}</p>
+
 
 
                         <textarea type="text" placeholder="Add a comment" className={`cominput-${data._id} stylized-input`}
@@ -56,10 +57,11 @@ const Post = () => {
                             }}
                         />
                         
+
                     </div>
                     <div className="card-reveal">
                         <span className="card-title">Options<i className="material-icons right">close</i></span>
-                        <HomePostOptions item={data} state={state}/>
+                       
                     </div>
                 </div>
                 :
