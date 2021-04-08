@@ -52,9 +52,9 @@ router.post('/signup', (req, res) => {
                                                 to: user.email,
                                                 from: "phongstagramherokuapp@gmail.com",
                                                 subject: "Signup Success!",
-                                                html: "<h1>Welcome to PHONNECT!</h1> <img style='width:300px;' src='cid:unique@kreata.ee'/>",
+                                                html: "<h1>Welcome to Phongstagram!</h1> <img style='width:300px;' src='cid:unique@kreata.ee'/>",
                                                 attachments: [{
-                                                    filename: 'phonnect_thumbnail.png',
+                                                    filename: 'phongstagram_thumbnail.png',
                                                     path: 'https://res.cloudinary.com/phongcloudinary/image/upload/v1602559179/phongstagram_thumb_qqiduz.png',
                                                     cid: 'unique@kreata.ee' //same cid value as in the html img src
                                                 }]
@@ -92,8 +92,8 @@ router.post('/signin', (req, res) => {
                     if (doMatch) {
                         //res.json({ message: "Successfully signed in" });
                         const token = jwt.sign({ _id: savedUser._id }, JWT_SECRET); //generate token based on user id
-                        const { _id, username, email, followers, profPic, following } = savedUser;
-                        res.json({ token, user: { _id, username, email, profPic, followers, following } });
+                        const { _id, username, email, followers, profPic, following, hobbies } = savedUser;
+                        res.json({ token, user: { _id, username, email, profPic, followers, following, hobbies } });
                     }
                     else {
                         return res.status(422).json({ error: "Invalid email or password" });
@@ -104,61 +104,5 @@ router.post('/signin', (req, res) => {
                 })
         })
 });
-
-router.post('/reset-password', (req, res) => {
-    crypto.randomBytes(32, (err, buffer) => {
-        if (err) {
-            console.log(err);
-        }
-        const token = buffer.toString("hex");
-        User.findOne({ email: req.body.email })
-            .then(user => {
-                if (!user) {
-                    return res.status(422).json({ error: "User email do not exist!" })
-                }
-                user.resetToken = token;
-                user.expireToken = Date.now() + 3600000;
-                user.save()
-                    .then(result => {
-                        transporter.sendMail({
-                            to: user.email,
-                            from: "phongstagramherokuapp@gmail.com",
-                            subject: "Password Reset",
-                            html: `
-                    <p>You requested for password reset</p>
-                    <h5>Click this <a href="${EMAIL}/resetpassword/${token}">link</a> to reset password</h5>
-                    `
-                        })
-                        res.json({ message: "Check your email!" });
-                    })
-            })
-    })
-})
-
-router.post('/new-password', (req, res) => {
-    const newPassword = req.body.password;
-    const sentToken = req.body.token;
-    User.findOne({
-        resetToken: sentToken,
-        expireToken: { $gt: Date.now() }
-    })
-    .then(user=>{
-        if(!user){
-            return res.status(422).json({error:"Session expired!"})
-        }
-        bcrypt.hash(newPassword,12)
-        .then(hashedPassword=>{
-            user.password=hashedPassword;
-            user.resetToken=undefined;
-            user.expireToken=undefined;
-            user.save().then(savedUser=>{
-                res.json({message:"Password updated successfully!"});
-            })
-        })
-    })
-    .catch(err=>{
-        console.log(err);
-    })
-})
 
 module.exports = router;
