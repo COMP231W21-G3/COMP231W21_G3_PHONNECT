@@ -47,6 +47,15 @@ const Post = () => {
 
                         <p><span style={{ fontWeight: "500" }}>{data.postedBy.username}</span> {data.caption}</p>
 
+
+                        <textarea type="text" placeholder="Add a comment" className={`cominput-${data._id} stylized-input`}
+                            onKeyDown={e => {
+                                if (e.key === "Enter" && !e.shiftKey) {
+                                    makeComment(e.target.value, data._id);
+                                }
+                            }}
+                        />
+                        
                     </div>
                     <div className="card-reveal">
                         <span className="card-title">Options<i className="material-icons right">close</i></span>
