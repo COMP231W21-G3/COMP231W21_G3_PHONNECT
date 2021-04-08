@@ -139,6 +139,35 @@ router.post('/search-participants', requireLogin, (req, res) => {
     }
 })
 
+router.post('/search-add-participants', requireLogin, (req, res) => {
+    let userPattern = new RegExp("^" + req.body.query);
+
+    Chatroom.findOne({_id:req.body.chatroom})
+        .then(
+            (savedChatroom) => {
+                console.log(savedChatroom)
+                if (savedChatroom) {
+                    if (req.body.query !== "") {
+                        User.find({ username: { $regex: userPattern }, _id: { $nin: savedChatroom.participants } })
+                            .select("_id username profPic")
+                            .then(searched_partis => {
+                                res.json({ searched_partis })
+                            })
+                            .catch(err => {
+                                console.log(err);
+                            })
+                    }
+                    else {
+                        res.json({ searched_partis: [] });
+                    }
+                }
+            }
+        )
+        .catch(err => {
+            console.log(err);
+        })
+})
+
 router.post('/changeHobbies',requireLogin,(req,res)=>{
     const {selectedHobbies}=req.body;
 
