@@ -506,7 +506,11 @@ const Chatrooms = () => {
                                         openedChatroom && openedChatroom.chatroom ?
                                             <>
                                                 <div className="chatroom-title col s10">{openedChatroom.chatroom.participants.map(parti => parti.username).join(" ")}</div>
-
+                                                <i className="material-icons right col s1 activator" style={{ cursor: "pointer" }}>more_vert</i>
+                                                <Link target="_blank" to={`/videocall/${openedChatroom.chatroom._id}`}>
+                                                <i className="material-icons right col s1" 
+                                                >call</i>
+                                                </Link> 
                                             </>
                                             : "Ready to chat?"
                                     }

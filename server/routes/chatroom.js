@@ -191,8 +191,105 @@ router.post('/findMatch',requireLogin,(req,res)=>{
     });
 })
 
+const addParticipantsLive = (socket, io) => {
+    socket.on("add participants", data => {
+        const { chatroom, partisToAdd } = data;
+
+        if (!partisToAdd || partisToAdd.length <= 0) {
+            const error = "Select another participant!";
+            return socket.emit("add participants failed", error);
+        }
+
+        Chatroom.findOneAndUpdate({_id:chatroom._id}, {
+            $addToSet: { participants: partisToAdd }
+        }, {
+            new: true
+        })
+            .populate("participants", "_id username profPic")
+            .exec((err, result) => {
+                if (err) {
+                    return socket.emit("add participants failed", error);
+                }
+                else {
+                    const chat = new Chat({
+                        message: `${data.currentUser.username} added ${partisToAdd.map(parti => parti.username + "")}`,
+                        inChatRoom: result
+                    })
+
+                    chat.save()
+                        .then(chat => {
+                            io.emit("add participants success", result);
+
+                            io.sockets.in(chatroom._id).emit("add chat success",
+                                chat
+                            );
+                        })
+
+                        .catch(err => {
+                            console.log(err);
+                        })
+                }
+            })
+    })
+}
+
+const removeParticipantLive = (socket, io) => {
+    socket.on("remove participant", data => {
+        const { user, chatroom } = data;
+
+        Chatroom.findOneAndUpdate({_id:chatroom._id}, {
+            $pull: { participants: user._id }
+        }, {
+            new: true
+        })
+            .populate("participants", "_id username profPic")
+            .exec(async (err, result) => {
+                if (err) {
+                    return res.status(422).json({ error: err });
+                }
+                else {
+                    if (result.participants.length <= 0) {
+                        socket.leave(socket.room);
+                        io.emit("remove participant success", result);
+                        await Chat.deleteMany({ inChatRoom: chatroom._id })
+                            .then(async deletedChats => {
+                                await Chatroom.deleteOne({ _id: chatroom._id })
+                                    .then(deletedChatroom => {
+
+                                    }).catch(err => {
+                                        console.log(err);
+                                    })
+                            }).catch(err => {
+                                console.log(err);
+                            })
+                    }
+                    else {
+                        const chat = new Chat({
+                            message: `${data.currentUser.username} removed ${user.username}`,
+                            inChatRoom: result
+                        })
+
+                        chat.save()
+                            .then(chat => {
+                                io.emit("remove participant success", result);
+
+                                io.sockets.in(chatroom._id).emit("add chat success",
+                                    chat
+                                );
+                            })
+
+                            .catch(err => {
+                                console.log(err);
+                            })
+                    }
+                }
+            })
+    })
+}
+
 module.exports = router;
 module.exports.createChatroomLive = createChatroomLive;
 module.exports.openChatroomLive = openChatroomLive;
 module.exports.addChatLive = addChatLive;
-
+module.exports.addParticipantsLive = addParticipantsLive;
+module.exports.removeParticipantLive = removeParticipantLive;
