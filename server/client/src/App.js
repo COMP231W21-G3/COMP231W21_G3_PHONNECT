@@ -12,8 +12,10 @@ import { reducer, initialState } from './reducers/userReducer';
 import { socketReducer, socketInitialState } from './reducers/socketReducer';
 import AllPosts from './components/screens/AllPosts';
 import Post from './components/screens/Post';
+import EditPost from './components/screens/EditPost';
 import Chatrooms from './components/screens/Chatrooms';
 import VoiceCommand from './components/VoiceCommand';
+
 
 export const UserContext = createContext();
 export const SocketContext=createContext();
@@ -63,6 +65,9 @@ const Routing = () => {
       </Route>
       <Route path="/post/:postId">
         <Post/>
+      </Route>
+      <Route path="/editpost/:postId">
+        <EditPost/>
       </Route>
       <Route path="/chatrooms">
         <Chatrooms/>
