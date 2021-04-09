@@ -25,6 +25,54 @@ const Post = () => {
             })
     }, [])
 
+    
+    const likePost = (id) => {
+        fetch('/like', {
+            method: "put",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + localStorage.getItem("jwt")
+            },
+            body: JSON.stringify({
+                postId: id
+            })
+        }).then(res => res.json())
+            .then(result => {
+                let newData = null;
+                if (data._id === result._id) {
+                    newData = result;
+                }
+                else {
+                    newData = data;
+                }
+                setData(newData);
+                console.log(newData);
+            }).catch(err => console.log(err))
+    }
+
+    const unlikePost = (id) => {
+        fetch('/unlike', {
+            method: "put",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + localStorage.getItem("jwt")
+            },
+            body: JSON.stringify({
+                postId: id
+            })
+        }).then(res => res.json())
+            .then(result => {
+                let newData = null;
+                if (data._id === result._id) {
+                    newData = result;
+                }
+                else {
+                    newData = data;
+                }
+                setData(newData);
+            }).catch(err => console.log(err))
+    }
+
     return (
         <div className="home">
 
@@ -47,7 +95,17 @@ const Post = () => {
 
                         <p><span style={{ fontWeight: "500" }}>{data.postedBy.username}</span> {data.caption}</p>
 
-                    
+
+
+                        <textarea type="text" placeholder="Add a comment" className={`cominput-${data._id} stylized-input`}
+                            onKeyDown={e => {
+                                if (e.key === "Enter" && !e.shiftKey) {
+                                    makeComment(e.target.value, data._id);
+                                    
+                                }
+                            }}
+                        />
+                        
 
                     </div>
                     <div className="card-reveal">
