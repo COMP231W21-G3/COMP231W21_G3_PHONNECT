@@ -6,6 +6,23 @@ import { SocketContext, UserContext } from "../App";
 const NavBar = () => {
     const { state, dispatch } = useContext(UserContext);
 
+    const fetchUsers = (query) => {
+        setSearch(query);
+        fetch('/search-users', {
+            method: "post",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + localStorage.getItem("jwt")
+            },
+            body: JSON.stringify({ query })
+        })
+            .then(res => res.json())
+            .then(results => {
+                console.log(results);
+                setUserDetails(results.users);
+            })
+    }
+
     const renderList = () => {
         if (state) { //state will be populated with user details on USER action, else it will be initialState null
             return (
