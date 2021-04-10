@@ -3,6 +3,7 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const requireLogin = require('../middleware/requireLogin');
 const Post = mongoose.model("Post");
+<<<<<<< Updated upstream
 const User = mongoose.model("User");
 
 router.post('/allposts', requireLogin, (req, res) => {
@@ -73,6 +74,8 @@ router.get('/myposts', requireLogin, (req, res) => {
             console.log(err);
         })
 });
+=======
+>>>>>>> Stashed changes
 
 router.post('/createpost', requireLogin, (req, res) => {
     const { caption, photos } = req.body;
@@ -94,6 +97,7 @@ router.post('/createpost', requireLogin, (req, res) => {
         .catch(err => {
             console.log(err);
         })
+<<<<<<< Updated upstream
 });
 
 router.put('/like', requireLogin, (req, res) => {
@@ -198,3 +202,6 @@ router.put("/deletecomment/:postId/:commentId", requireLogin, (req, res) => {
 });
 
 module.exports = router;
+=======
+});
+>>>>>>> Stashed changes
