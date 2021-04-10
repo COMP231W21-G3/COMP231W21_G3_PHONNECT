@@ -4,6 +4,7 @@ import PreLoader from '../Preloader';
 import { UserContext } from '../../App';
 import M from 'materialize-css';
 import { Link, useHistory, useParams } from 'react-router-dom';
+import CommentsModal from '../CommentsModal';
 
 const Post = () => {
     const history = useHistory();
@@ -72,6 +73,25 @@ const Post = () => {
                 setData(newData);
             }).catch(err => console.log(err))
     }
+    const unfollowUser = (followId) => {
+        fetch('/unfollow', {
+            method: "put",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + localStorage.getItem("jwt")
+            },
+            body: JSON.stringify({
+                unfollowId: followId
+            })
+        })
+            .then(res => res.json())
+            .then(result => {
+
+                console.log(result);
+                dispatch({ type: "UPDATE", payload: { following: result.following, followers: result.followers } });
+                localStorage.setItem("user", JSON.stringify(result));
+            })
+    }
 
     return (
         <div className="home">
@@ -91,17 +111,19 @@ const Post = () => {
 
                         <CarouselSlider item={data} />
 
-                       
-
                         <p><span style={{ fontWeight: "500" }}>{data.postedBy.username}</span> {data.caption}</p>
 
-
+                        {data.comments.length > 0 
+                            ?
+                            <div><CommentsModal item={data} state={state} deleteComment={deleteComment} />
+                                <p style={{ textOverflow: "ellipsis", overflow: "hidden" }}><span style={{ fontWeight: "500", paddingRight: "3px" }}>{data.comments[data.comments.length - 1].postedBy.username}</span>{data.comments[data.comments.length - 1].text}</p></div>
+                            : null
+                        }
 
                         <textarea type="text" placeholder="Add a comment" className={`cominput-${data._id} stylized-input`}
                             onKeyDown={e => {
                                 if (e.key === "Enter" && !e.shiftKey) {
                                     makeComment(e.target.value, data._id);
-                                    
                                 }
                             }}
                         />
