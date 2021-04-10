@@ -40,3 +40,150 @@ const makeComment = (text, postId) => {
             console.log(err);
         })
 }
+
+import PreLoader from '../Preloader';
+import { UserContext } from '../../App';
+import M from 'materialize-css';
+import { Link, useHistory, useParams } from 'react-router-dom';
+import CommentsModal from '../CommentsModal';
+
+const Post = () => {
+    const history = useHistory();
+    const [data, setData] = useState();
+    const { state, dispatch } = useContext(UserContext);
+    const { postId } = useParams();
+
+
+    useEffect(() => {
+        fetch(`/post/${postId}`, {
+            headers: {
+                "Authorization": "Bearer " + localStorage.getItem("jwt")
+            }
+        })
+            .then(res => res.json())
+            .then(result => {
+                console.log(result);
+                setData(result.post);
+            })
+    }, [])
+
+    
+    const likePost = (id) => {
+        fetch('/like', {
+            method: "put",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + localStorage.getItem("jwt")
+            },
+            body: JSON.stringify({
+                postId: id
+            })
+        }).then(res => res.json())
+            .then(result => {
+                let newData = null;
+                if (data._id === result._id) {
+                    newData = result;
+                }
+                else {
+                    newData = data;
+                }
+                setData(newData);
+                console.log(newData);
+            }).catch(err => console.log(err))
+    }
+
+    const unlikePost = (id) => {
+        fetch('/unlike', {
+            method: "put",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + localStorage.getItem("jwt")
+            },
+            body: JSON.stringify({
+                postId: id
+            })
+        }).then(res => res.json())
+            .then(result => {
+                let newData = null;
+                if (data._id === result._id) {
+                    newData = result;
+                }
+                else {
+                    newData = data;
+                }
+                setData(newData);
+            }).catch(err => console.log(err))
+    }
+    const unfollowUser = (followId) => {
+        fetch('/unfollow', {
+            method: "put",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + localStorage.getItem("jwt")
+            },
+            body: JSON.stringify({
+                unfollowId: followId
+            })
+        })
+            .then(res => res.json())
+            .then(result => {
+
+                console.log(result);
+                dispatch({ type: "UPDATE", payload: { following: result.following, followers: result.followers } });
+                localStorage.setItem("user", JSON.stringify(result));
+            })
+    }
+
+    return (
+        <div className="home">
+
+            {data ?
+
+
+                <div className="card home-card" key={data._id}>
+                    <div className="card-content">
+                        <span className="card-title">
+                            <Link to={data.postedBy._id == state._id ? "/profile" : `/profile/${data.postedBy.username}`}>
+                                <img className="circle small-profPic" src={data.postedBy.profPic} />
+                                {data.postedBy.username}</Link>
+                            <i className="material-icons right activator" style={{ cursor: "pointer" }}>more_vert</i></span>
+
+                        <p className="grey-text" style={{ paddingBottom: "13px", fontSize: "0.8em", textTransform: "uppercase" }}>{new Date(data.createdAt).toLocaleString()}</p>
+
+                        <CarouselSlider item={data} />
+
+                        <p><span style={{ fontWeight: "500" }}>{data.postedBy.username}</span> {data.caption}</p>
+
+                        {data.comments.length > 0 
+                            ?
+                            <div><CommentsModal item={data} state={state} deleteComment={deleteComment} />
+                                <p style={{ textOverflow: "ellipsis", overflow: "hidden" }}><span style={{ fontWeight: "500", paddingRight: "3px" }}>{data.comments[data.comments.length - 1].postedBy.username}</span>{data.comments[data.comments.length - 1].text}</p></div>
+                            : null
+                        }
+
+                        <textarea type="text" placeholder="Add a comment" className={`cominput-${data._id} stylized-input`}
+                            onKeyDown={e => {
+                                if (e.key === "Enter" && !e.shiftKey) {
+                                    makeComment(e.target.value, data._id);
+                                }
+                            }}
+                        />
+                        
+
+                    </div>
+                    <div className="card-reveal">
+                        <span className="card-title">Options<i className="material-icons right">close</i></span>
+                       
+                    </div>
+                </div>
+                :
+                <div style={{ display: "flex", justifyContent: "center", margin: "20px" }}>
+                    <PreLoader />
+                </div>
+            }
+
+        </div>
+    )
+}
+
+export default Post
