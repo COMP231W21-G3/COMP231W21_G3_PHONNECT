@@ -6,6 +6,9 @@ import { SocketContext, UserContext } from "../App";
 const NavBar = () => {
     const searchModal = useRef(null);
     const { state, dispatch } = useContext(UserContext);
+    const {socketState,socketDispatch}=useContext(SocketContext);
+    const [search, setSearch] = useState("");
+    const [userDetails, setUserDetails] = useState([]);
 
     const fetchUsers = (query) => {
         setSearch(query);
@@ -22,7 +25,49 @@ const NavBar = () => {
                 console.log(results);
                 setUserDetails(results.users);
             })
-    } 
+    }
+    
+    const followUser = (followId) => {
+        fetch('/follow', {
+            method: "put",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + localStorage.getItem("jwt")
+            },
+            body: JSON.stringify({
+                followId: followId
+            })
+        })
+            .then(res => res.json())
+            .then(result => {
+                console.log(result);
+                dispatch({ type: "UPDATE", payload: { following: result.following, followers: result.followers } });
+                localStorage.setItem("user", JSON.stringify(result));
+            })
+    }
+
+    const unfollowUser = (followId) => {
+        fetch('/unfollow', {
+            method: "put",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + localStorage.getItem("jwt")
+            },
+            body: JSON.stringify({
+                unfollowId: followId
+            })
+        })
+            .then(res => res.json())
+            .then(result => {
+
+                console.log(result);
+                dispatch({ type: "UPDATE", payload: { following: result.following, followers: result.followers } });
+                localStorage.setItem("user", JSON.stringify(result));
+            })
+    }
+
+
+
 
     const renderList = () => {
         if (state) { //state will be populated with user details on USER action, else it will be initialState null
