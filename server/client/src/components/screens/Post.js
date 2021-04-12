@@ -1,9 +1,13 @@
 import React, { useState, useEffect, useContext } from 'react';
 import CarouselSlider from '../CarouselSlider';
+import HomePostOptions from '../HomePostOptions';
 import PreLoader from '../Preloader';
 import { UserContext } from '../../App';
 import M from 'materialize-css';
+import CommentsModal from '../CommentsModal';
+import LikesModal from '../LikesModal';
 import { Link, useHistory, useParams } from 'react-router-dom';
+
 
 const Post = () => {
     const history = useHistory();
@@ -25,7 +29,40 @@ const Post = () => {
             })
     }, [])
 
-    
+
+    const makeComment = (text, postId) => {
+        fetch('/comment', {
+            method: "put",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + localStorage.getItem("jwt")
+            },
+            body: JSON.stringify({
+                postId,
+                text
+            })
+        })
+            .then(res => res.json())
+            .then(result => {
+                console.log(result);
+                let newData = null;
+                if (data._id === result._id) {
+                    newData = result;
+                }
+                else {
+                    newData = data;
+                }
+                setData(newData);
+
+                var commentinput = document.getElementsByClassName(`cominput-${postId}`)[0]
+                commentinput.value = "";
+                commentinput.blur();
+
+            }).catch(err => {
+                console.log(err);
+            })
+    }
+
     const likePost = (id) => {
         fetch('/like', {
             method: "put",
@@ -85,6 +122,67 @@ const Post = () => {
                 console.log(result);
                 history.push('/');
                 M.toast({ html: "Deleted Post Successfully!", classes: "#43a047 green darken-1" });
+
+    const deleteComment = (postId, commentId) => {
+
+        fetch(`/deletecomment/${postId}/${commentId}`, {
+            method: "put",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + localStorage.getItem("jwt")
+            },
+        })
+            .then((res) => res.json())
+            .then((result) => {
+                console.log(result);
+                let newData = null;
+                if (data._id === result._id) {
+                    newData = result;
+                }
+                else {
+                    newData = data;
+                }
+                setData(newData);
+            });
+    };
+
+    const followUser = (followId) => {
+        fetch('/follow', {
+            method: "put",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + localStorage.getItem("jwt")
+            },
+            body: JSON.stringify({
+                followId: followId
+            })
+        })
+            .then(res => res.json())
+            .then(result => {
+                console.log(result);
+                dispatch({ type: "UPDATE", payload: { following: result.following, followers: result.followers } });
+                localStorage.setItem("user", JSON.stringify(result));
+            })
+    }
+
+
+    const unfollowUser = (followId) => {
+        fetch('/unfollow', {
+            method: "put",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + localStorage.getItem("jwt")
+            },
+            body: JSON.stringify({
+                unfollowId: followId
+            })
+        })
+            .then(res => res.json())
+            .then(result => {
+
+                console.log(result);
+                dispatch({ type: "UPDATE", payload: { following: result.following, followers: result.followers } });
+                localStorage.setItem("user", JSON.stringify(result));
             })
     }
 
@@ -119,26 +217,28 @@ const Post = () => {
 
                         <LikesModal item={data} state={state} followUser={followUser} unfollowUser={unfollowUser} />
 
-                       
-
                         <p><span style={{ fontWeight: "500" }}>{data.postedBy.username}</span> {data.caption}</p>
 
-
+                        {data.comments.length > 0
+                            ?
+                            <div><CommentsModal item={data} state={state} deleteComment={deleteComment} />
+                                <p style={{ textOverflow: "ellipsis", overflow: "hidden" }}><span style={{ fontWeight: "500", paddingRight: "3px" }}>{data.comments[data.comments.length - 1].postedBy.username}</span>{data.comments[data.comments.length - 1].text}</p></div>
+                            : null
+                        }
 
                         <textarea type="text" placeholder="Add a comment" className={`cominput-${data._id} stylized-input`}
                             onKeyDown={e => {
                                 if (e.key === "Enter" && !e.shiftKey) {
                                     makeComment(e.target.value, data._id);
-                                    
                                 }
                             }}
                         />
-                        
+
 
                     </div>
                     <div className="card-reveal">
                         <span className="card-title">Options<i className="material-icons right">close</i></span>
-                       
+
                     </div>
                 </div>
                 :
