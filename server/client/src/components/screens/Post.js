@@ -73,6 +73,21 @@ const Post = () => {
             }).catch(err => console.log(err))
     }
 
+    const deletePost = (postId) => {
+        fetch(`/deletepost/${postId}`, {
+            method: "delete",
+            headers: {
+                "Authorization": "Bearer " + localStorage.getItem("jwt")
+            }
+        })
+            .then(res => res.json())
+            .then(result => {
+                console.log(result);
+                history.push('/');
+                M.toast({ html: "Deleted Post Successfully!", classes: "#43a047 green darken-1" });
+            })
+    }
+
     return (
         <div className="home">
 
@@ -90,6 +105,19 @@ const Post = () => {
                         <p className="grey-text" style={{ paddingBottom: "13px", fontSize: "0.8em", textTransform: "uppercase" }}>{new Date(data.createdAt).toLocaleString()}</p>
 
                         <CarouselSlider item={data} />
+
+                        {data.likes.find(record => record._id === state._id)
+                            ? <i className="material-icons"
+                                style={{ color: "red", cursor: "pointer" }}
+                                onClick={() => { unlikePost(data._id) }}
+                            >favorite</i>
+                            : <i className="material-icons"
+                                style={{ cursor: "pointer" }}
+                                onClick={() => { likePost(data._id) }}
+                            >favorite_border</i>
+                        }
+
+                        <LikesModal item={data} state={state} followUser={followUser} unfollowUser={unfollowUser} />
 
                        
 
