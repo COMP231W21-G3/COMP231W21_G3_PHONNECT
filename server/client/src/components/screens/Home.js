@@ -39,6 +39,45 @@ const Home = () => {
             })
     }
 
+    const deletePost = (postId) => {
+        fetch(`/deletepost/${postId}`, {
+            method: "delete",
+            headers: {
+                "Authorization": "Bearer " + localStorage.getItem("jwt")
+            }
+        })
+            .then(res => res.json())
+            .then(result => {
+                console.log(result);
+                history.push('/');
+                M.toast({ html: "Deleted Post Successfully!", classes: "#43a047 green darken-1" });
+            })
+    }
+
+    const deleteComment = (postId, commentId) => {
+
+        fetch(`/deletecomment/${postId}/${commentId}`, {
+            method: "put",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + localStorage.getItem("jwt")
+            },
+        })
+            .then((res) => res.json())
+            .then((result) => {
+                console.log(result);
+                const newData = data.map((item) => {
+                    if (item._id == result._id) {
+                        return result;
+                    }
+                    else {
+                        return item;
+                    }
+                });
+                setData(newData);
+            });
+    };
+
     const onLoadMore = () => {
         let newSkip = skip + limit;
         getPosts({ skip: newSkip, limit });

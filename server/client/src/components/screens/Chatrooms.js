@@ -6,12 +6,86 @@ import { Link } from 'react-router-dom';
 import Picker from 'emoji-picker-react';
 import { isMobile } from 'react-device-detect';
 
+
+
+/////////////////////////////////////////////////////////////////////////////
+////////////////////////// Load Speech Recognition //////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+try {
+    console.log("Load speech recognition");
+    var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    var recognition = new SpeechRecognition();
+}
+catch (e) {
+    console.error(e);
+}
+
+recognition.continuous = false;
+
+
+// This block is called every time the Speech APi captures a line. 
+recognition.onresult = function (event) {
+
+    //recognition.stop();
+    console.log("STOPPED");
+
+    var current = event.resultIndex;
+
+    // Get a transcript of what was said.
+    var transcript = event.results[current][0].transcript;
+
+    var strTranscript = String(transcript);
+    console.log("captured speech: " + strTranscript);
+
+    if (strTranscript.includes("start"|| strTranscript.includes("create"))) {    
+
+        if (strTranscript.includes("chat")) {            
+            console.log("Starting a new chatroom");
+            document.getElementById("showParticipantModal").click();            
+        }
+    }
+
+    if (strTranscript.includes("search")) {
+        console.log("search: " + strTranscript);
+
+        var searchParticipantName = strTranscript.replace("search","");
+        searchParticipantName = searchParticipantName.replace(/ /g,'')
+        searchParticipantName = searchParticipantName.toLowerCase();
+    
+        document.getElementById("searchParticipantText").value = searchParticipantName;
+        document.getElementById("searchParticipantRefresh").click();
+
+    }
+
+    console.log("START");
+    //recognition.start();
+}
+
+recognition.onstart = function () {
+}
+
+recognition.onspeechend = function () {
+}
+
+recognition.onend = function () {
+    // Want to keep listening to minimize as much manual interaction as possible.
+    recognition.start();
+}
+
+recognition.onerror = function (event) {
+};
+
+
+
+
+
+
 const Chatrooms = () => {
     const [rooms, setRooms] = useState([]);
     const [loading, setLoading] = useState(false);
     const { state, dispatch } = useContext(UserContext);
-    const {socketState:socket,socketDispatch}=useContext(SocketContext);
-    
+    const { socketState: socket, socketDispatch } = useContext(SocketContext);
+
     const searchParticipantModal = useRef(null);
     const [searchParticipant, setSearchParticipant] = useState("");
     const [participantDetails, setParticipantDetails] = useState([]);
@@ -21,8 +95,8 @@ const Chatrooms = () => {
     const [openChatroomLoading, setOpenChatroomLoading] = useState(false);
 
     const [chatImageUrl, setChatImageUrl] = useState();
-    const [tempChatroom,setTempChatroom]=useState({});
-    const [tempSender,setTempSender]=useState();
+    const [tempChatroom, setTempChatroom] = useState({});
+    const [tempSender, setTempSender] = useState();
 
     const searchAddParticipantModal = useRef(null);
     const [searchAddParticipant, setSearchAddParticipant] = useState("");
@@ -36,13 +110,13 @@ const Chatrooms = () => {
 
     const [participantToRemove, setParticipantToRemove] = useState({});
 
-    const allHobbies = ["Reading", "Gaming", "Writing", "Boardgame", "Music", "Fashion", "Painting", 
-    "Netflix", "Dining", "Gym", "Sports", "Theatre", "Photography", "Karaoke", "Dancing", "Puzzles", 
-    "Podcasts", "Standup", "Anime", "Manga", "Hiking", "Cooking", "Makeup", "Coding","Interior Design"];
+    const allHobbies = ["Reading", "Gaming", "Writing", "Boardgame", "Music", "Fashion", "Painting",
+        "Netflix", "Dining", "Gym", "Sports", "Theatre", "Photography", "Karaoke", "Dancing", "Puzzles",
+        "Podcasts", "Standup", "Anime", "Manga", "Hiking", "Cooking", "Makeup", "Coding", "Interior Design"];
     const [selectedHobbies, setSelectedHobbies] = useState([]);
     const [myHobbies, setMyHobbies] = useState([]);
-    const [findMatchLoading,setFindMatchLoading] = useState(false);
-    const [matches,setMatches]=useState([]);
+    const [findMatchLoading, setFindMatchLoading] = useState(false);
+    const [matches, setMatches] = useState([]);
 
     useEffect(() => {
         var modals = document.querySelectorAll('.modal');
@@ -98,56 +172,56 @@ const Chatrooms = () => {
         setSearchParticipantsSelected(newList);
     }
 
-    const createChatroomLive=()=>{
+    const createChatroomLive = () => {
         setLoading(true);
-        socket&&socket.emit("create chatroom",searchParticipantsSelected);
+        socket && socket.emit("create chatroom", searchParticipantsSelected);
     }
 
     useEffect(() => {
-        socket&&socket.on("create chatroom failed", error => {
+        socket && socket.on("create chatroom failed", error => {
             M.toast({ html: error, classes: "#c62828 red darken-1" });
             setLoading(false);
         })
 
-        return () => socket&&socket.removeAllListeners("create chatroom failed");
+        return () => socket && socket.removeAllListeners("create chatroom failed");
     })
 
     useEffect(() => {
-        socket&&socket.on("create chatroom success", chatroom => {
+        socket && socket.on("create chatroom success", chatroom => {
             if (chatroom.participants.filter(parti => parti._id === state._id).length > 0) {
                 console.log(chatroom);
                 setRooms([...rooms, chatroom]);
                 setSearchParticipantsSelected([{ _id: state._id, username: state.username, profPic: state.profPic }]);
-                openChatroomLive(chatroom._id,state._id);
+                openChatroomLive(chatroom._id, state._id);
                 setLoading(false);
             }
         })
 
-        return () => socket&&socket.removeAllListeners("create chatroom success");
+        return () => socket && socket.removeAllListeners("create chatroom success");
     })
 
-    const openChatroomLive=(chatroomId,currentUserId)=>{
+    const openChatroomLive = (chatroomId, currentUserId) => {
         setOpenChatroomLoading(true);
 
-        socket&&socket.emit("open chatroom",{chatroomId,currentUserId});
+        socket && socket.emit("open chatroom", { chatroomId, currentUserId });
     }
 
-    useEffect(()=>{
-        socket&&socket.on("open chatroom success",result=>{
+    useEffect(() => {
+        socket && socket.on("open chatroom success", result => {
             console.log(result);
             setOpenedChatroom(result);
             setOpenChatroomLoading(false);
 
             var materialboxes = document.querySelectorAll('.materialboxed');
             M.Materialbox.init(materialboxes, {});
-            if(chatboxRef.current) chatboxRef.current.scrollTop = chatboxRef.current.scrollHeight;
+            if (chatboxRef.current) chatboxRef.current.scrollTop = chatboxRef.current.scrollHeight;
         })
 
-        return () => {socket&&socket.removeAllListeners("open chatroom success");}
+        return () => { socket && socket.removeAllListeners("open chatroom success"); }
     })
 
-    const addChatLive=(message)=>{
-        socket&&socket.emit("add chat",{message,inChatRoom:openedChatroom.chatroom,sender:state._id});
+    const addChatLive = (message) => {
+        socket && socket.emit("add chat", { message, inChatRoom: openedChatroom.chatroom, sender: state._id });
     }
 
     const addChatImageLive = async (im) => {
@@ -167,26 +241,26 @@ const Chatrooms = () => {
     }
 
     useEffect(() => {
-        if(chatImageUrl){
-            socket&&socket.emit("add chat",{image:chatImageUrl,inChatRoom:tempChatroom,sender:tempSender});
+        if (chatImageUrl) {
+            socket && socket.emit("add chat", { image: chatImageUrl, inChatRoom: tempChatroom, sender: tempSender });
         }
     }, [chatImageUrl])
 
-    useEffect(()=>{
-        socket&&socket.on("add chat success",chat=>{
+    useEffect(() => {
+        socket && socket.on("add chat success", chat => {
             if (openedChatroom) {
                 console.log(chat);
-                if(!chat.image||(chat.image&&chat.inChatRoom===openedChatroom.chatroom._id)){
+                if (!chat.image || (chat.image && chat.inChatRoom === openedChatroom.chatroom._id)) {
                     setOpenedChatroom({ ...openedChatroom, chats: [...openedChatroom.chats, chat] });
                 }
 
                 var materialboxes = document.querySelectorAll('.materialboxed');
                 M.Materialbox.init(materialboxes, {});
-                if(chatboxRef.current) chatboxRef.current.scrollTop = chatboxRef.current.scrollHeight;
+                if (chatboxRef.current) chatboxRef.current.scrollTop = chatboxRef.current.scrollHeight;
             }
         })
 
-        return () => socket&&socket.removeAllListeners("add chat success");
+        return () => socket && socket.removeAllListeners("add chat success");
     })
 
     const fetchSearchAddParticipants = (query) => {
@@ -219,23 +293,23 @@ const Chatrooms = () => {
         setSearchAddParticipantsSelected(newList);
     }
 
-    const selectHobby=(hobby)=>{
+    const selectHobby = (hobby) => {
         setSelectedHobbies([...selectedHobbies, hobby]);
     }
 
-    const unselectHobby=(hobby)=>{
+    const unselectHobby = (hobby) => {
         const newList = selectedHobbies.filter(selectedHobby => selectedHobby !== hobby);
         setSelectedHobbies(newList);
     }
 
-    useEffect(()=>{
-        if(state){
+    useEffect(() => {
+        if (state) {
             setMyHobbies(state.hobbies);
             setSelectedHobbies(state.hobbies);
         }
-    },[state])
+    }, [state])
 
-    const updateHobbies=()=>{
+    const updateHobbies = () => {
         fetch("/changeHobbies", {
             method: "post",
             headers: {
@@ -262,7 +336,7 @@ const Chatrooms = () => {
             })
     }
 
-    const findMatch=()=>{
+    const findMatch = () => {
         fetch("/findMatch", {
             method: "post",
             headers: {
@@ -287,26 +361,51 @@ const Chatrooms = () => {
             })
     }
 
-    const updateHobbiesAndFindMatch=()=>{
+    const updateHobbiesAndFindMatch = () => {
         setFindMatchLoading(true);
-        if(selectedHobbies.length>0){
+        if (selectedHobbies.length > 0) {
             updateHobbies();
             findMatch();
 
             setFindMatchLoading(false);
 
         }
-        else{
+        else {
             M.toast({ html: "Select at least 1 hobby!", classes: "#c62828 red darken-1" });
             setFindMatchLoading(false);
         }
     }
 
-    const matchUser=(match)=>{
-        const participants=[state,match];
+    const matchUser = (match) => {
+        const participants = [state, match];
         console.log(participants);
         setLoading(true);
-        socket&&socket.emit("create chatroom",participants);
+        socket && socket.emit("create chatroom", participants);
+    }
+
+
+    // Start Voice Listener
+    const chatTextVoiceListener = () => {
+
+        console.log("Start recording");
+        recognition.start();
+
+
+        //var instruction = document.getElementById("instruction");
+
+        // if (instruction.innerText != "Voice recognition activated. Try speaking into the microphone.") {
+        //     recognition.start();
+        // }
+    }
+
+    const testFunction = () => {
+        console.log("TEST CLICK WORKS");
+        //document.getElementById("searchParticipantText").value = "HELLO";
+    }
+
+    const searchParticipantRefresh = () => {
+        console.log("refresh button");
+        fetchSearchParticipants(document.getElementById("searchParticipantText").value);
     }
 
     return (
@@ -331,12 +430,12 @@ const Chatrooms = () => {
                         ))
                         }
                     </div>
-                    
+
                     <button className="btn waves-effect waves-light #1976d2 blue darken-1"
-                        style={{ width: "-webkit-fill-available",margin:"20px 0px" }}
+                        style={{ width: "-webkit-fill-available", margin: "20px 0px" }}
                         onClick={() => updateHobbiesAndFindMatch()}>
                         Update Hobbies & Find Match</button>
-                    
+
                     <h4 className="styled-title">Closest Match</h4>
 
                     {
@@ -347,34 +446,34 @@ const Chatrooms = () => {
                             matches.length > 0
                                 ?
                                 <ul className="collection">
-                                {matches.map((match) => (
-                                    <li key={match._id} className="collection-item row">
-                                        <div className="col s12" style={{padding:"15px 20px"}}>
-                                            <img className="small-profPic" src={match.profPic} />
-                                            <span>{match.username}</span>
-                                            <button className="btn-small waves-effect waves-light #1976d2 blue darken-1 right" 
-                                                onClick={() => matchUser(match)}>Match</button>
-                                        </div>
-                                        
-                                        <div className="col s12">
-                                            {match.hobbies.map((hobby, i) => (
-                                                !myHobbies.some(myHobby => myHobby === hobby)
-                                                    ?
-                                                    <div key={i} className="chip">
-                                                        <span>{hobby}</span>
-                                                    </div>
-                                                    :
-                                                    <div key={i} className="#bbdefb blue lighten-4 chip">
-                                                        <span>{hobby}</span>
-                                                    </div>
-                                            )
-                                            )}
-                                        </div>
+                                    {matches.map((match) => (
+                                        <li key={match._id} className="collection-item row">
+                                            <div className="col s12" style={{ padding: "15px 20px" }}>
+                                                <img className="small-profPic" src={match.profPic} />
+                                                <span>{match.username}</span>
+                                                <button className="btn-small waves-effect waves-light #1976d2 blue darken-1 right"
+                                                    onClick={() => matchUser(match)}>Match</button>
+                                            </div>
 
-                                    </li>
-                                ))}
+                                            <div className="col s12">
+                                                {match.hobbies.map((hobby, i) => (
+                                                    !myHobbies.some(myHobby => myHobby === hobby)
+                                                        ?
+                                                        <div key={i} className="chip">
+                                                            <span>{hobby}</span>
+                                                        </div>
+                                                        :
+                                                        <div key={i} className="#bbdefb blue lighten-4 chip">
+                                                            <span>{hobby}</span>
+                                                        </div>
+                                                )
+                                                )}
+                                            </div>
+
+                                        </li>
+                                    ))}
                                 </ul>
-                                :<p>No Match!</p>
+                                : <p>No Match!</p>
                     }
 
                 </div>
@@ -409,11 +508,13 @@ const Chatrooms = () => {
                     </div>
 
                     <input
+                        id="searchParticipantText"
                         type="text"
                         placeholder="search participants"
                         value={searchParticipant}
                         onChange={(e) => fetchSearchParticipants(e.target.value)}
                     />
+                    <button id="searchParticipantRefresh" onClick = {() => searchParticipantRefresh()}>Search</button>
 
                     <ul className="collection">
                         {
@@ -465,21 +566,26 @@ const Chatrooms = () => {
             </div>
 
             <div className="row" style={{ maxWidth: "800px", margin: "20px auto" }}>
-                <div className="col s12" style={{marginBottom:"10px"}}>
-                    <a className="btn-floating btn-large waves-effect waves-light #1976d2 blue darken-1 modal-trigger" data-target="searchParticipantModal"
+                <div className="col s12" style={{ marginBottom: "10px" }}>
+                    <a id="showParticipantModal" className="btn-floating btn-large waves-effect waves-light #1976d2 blue darken-1 modal-trigger" data-target="searchParticipantModal"
                         style={{ width: "40px", height: "40px" }}>
                         <i className="material-icons"
                             style={{ lineHeight: "40px" }}
                         >add</i></a>
 
+                    <button id="btnStartVoice" onClick={() => {chatTextVoiceListener()}}>START VOICE</button>
+                    <button id="btnTest" onClick={() => {testFunction()}}>TEST</button>
+
+
+
                     <a className="btn waves-effect waves-light #1976d2 blue darken-1 white-text modal-trigger" data-target="meetAStrangerModal"
-                        style={{ height: "40px", float:"right",borderRadius:"40px" }}>
+                        style={{ height: "40px", float: "right", borderRadius: "40px" }}>
                         Meet A Stranger</a>
 
                 </div>
 
                 <div className="col s4 chatrooms-list">
-                    <div className="collection" style={{fontSize:"12px"}}>
+                    <div className="collection" style={{ fontSize: "12px" }}>
                         {
                             loading ?
                                 <div style={{ display: "flex", justifyContent: "center", margin: "20px" }}>
@@ -494,15 +600,15 @@ const Chatrooms = () => {
                                             ? "collection-item active #b3e5fc light-blue lighten-4"
                                             : "collection-item"}
                                             key={room._id}
-                                            onClick={() => { openChatroomLive(room._id,state._id) }}
-                                            >
+                                            onClick={() => { openChatroomLive(room._id, state._id) }}
+                                        >
                                             <div className="chatroom-title">
                                                 {/* {!room.lastSeenBy.includes(state._id)&&<span className="new badge blue" data-badge-caption="new"></span>} */}
                                                 {
                                                     room.participants.map(parti => {
                                                         return <span key={parti._id}>{parti.username} </span>
                                                     })
-                                                }    
+                                                }
                                             </div>
                                         </a>
                                     )
@@ -525,9 +631,9 @@ const Chatrooms = () => {
                                                 <div className="chatroom-title col s10">{openedChatroom.chatroom.participants.map(parti => parti.username).join(" ")}</div>
                                                 <i className="material-icons right col s1 activator" style={{ cursor: "pointer" }}>more_vert</i>
                                                 <Link target="_blank" to={`/videocall/${openedChatroom.chatroom._id}`}>
-                                                <i className="material-icons right col s1" 
-                                                >call</i>
-                                                </Link> 
+                                                    <i className="material-icons right col s1"
+                                                    >call</i>
+                                                </Link>
                                             </>
                                             : "Ready to chat?"
                                     }
@@ -540,51 +646,51 @@ const Chatrooms = () => {
                                                 return (
                                                     <div key={chat._id}>
                                                         {
-                                                            chat.sender?
-                                                            chat.sender._id === state._id ?
-                                                                <div className="mine messages">
-                                                                    <div className="message #1976d2 blue darken-1">
-                                                                        {chat.message
-                                                                            ? chat.message
-                                                                            : chat.image
-                                                                                ? chat.image.substring(chat.image.lastIndexOf('.') + 1, chat.image.length).match(/(jpg|jpeg|png|gif)$/i)
-                                                                                    ? <img className="upload-img materialboxed"
-                                                                                        src={chat.image && chat.image}></img>
-                                                                                    : <video className="upload-img"
-                                                                                        frameBorder="0" controls src={chat.image && chat.image}></video>
-                                                                                : null
-                                                                        }
+                                                            chat.sender ?
+                                                                chat.sender._id === state._id ?
+                                                                    <div className="mine messages">
+                                                                        <div className="message #1976d2 blue darken-1">
+                                                                            {chat.message
+                                                                                ? chat.message
+                                                                                : chat.image
+                                                                                    ? chat.image.substring(chat.image.lastIndexOf('.') + 1, chat.image.length).match(/(jpg|jpeg|png|gif)$/i)
+                                                                                        ? <img className="upload-img materialboxed"
+                                                                                            src={chat.image && chat.image}></img>
+                                                                                        : <video className="upload-img"
+                                                                                            frameBorder="0" controls src={chat.image && chat.image}></video>
+                                                                                    : null
+                                                                            }
+                                                                        </div>
+                                                                        <div className="mytime grey-text">{new Date(chat.createdAt).toLocaleString()}</div>
                                                                     </div>
-                                                                    <div className="mytime grey-text">{new Date(chat.createdAt).toLocaleString()}</div>
-                                                                </div>
-                                                                :
-                                                                <div className="yours messages">
-                                                                    <div>
-                                                                        <img className="small-profPic" src={chat.sender.profPic} />
-                                                                        <span style={{ fontWeight: "300", fontSize: "1.1em" }}>{chat.sender.username}</span>
+                                                                    :
+                                                                    <div className="yours messages">
+                                                                        <div>
+                                                                            <img className="small-profPic" src={chat.sender.profPic} />
+                                                                            <span style={{ fontWeight: "300", fontSize: "1.1em" }}>{chat.sender.username}</span>
+                                                                        </div>
+                                                                        <div className="message">
+                                                                            {chat.message
+                                                                                ? chat.message
+                                                                                : chat.image
+                                                                                    ? chat.image.substring(chat.image.lastIndexOf('.') + 1, chat.image.length).match(/(jpg|jpeg|png|gif)$/i)
+                                                                                        ? <img className="upload-img materialboxed"
+                                                                                            src={chat.image && chat.image}></img>
+                                                                                        : <video className="upload-img"
+                                                                                            frameBorder="0" controls src={chat.image && chat.image}></video>
+                                                                                    : null
+                                                                            }
+                                                                        </div>
+                                                                        <div className="yourtime grey-text">{new Date(chat.createdAt).toLocaleString()}</div>
                                                                     </div>
-                                                                    <div className="message">
-                                                                        {chat.message
-                                                                            ? chat.message
-                                                                            : chat.image
-                                                                                ? chat.image.substring(chat.image.lastIndexOf('.') + 1, chat.image.length).match(/(jpg|jpeg|png|gif)$/i)
-                                                                                    ? <img className="upload-img materialboxed"
-                                                                                        src={chat.image && chat.image}></img>
-                                                                                    : <video className="upload-img"
-                                                                                        frameBorder="0" controls src={chat.image && chat.image}></video>
-                                                                                : null
-                                                                        }
-                                                                    </div>
-                                                                    <div className="yourtime grey-text">{new Date(chat.createdAt).toLocaleString()}</div>
-                                                                </div>
-                                                            
-                                                            :<p className="chatroom-common-message">{chat.message}</p>
+
+                                                                : <p className="chatroom-common-message">{chat.message}</p>
 
                                                         }
                                                     </div>
                                                 )
                                             })
-                                            : 
+                                            :
                                             <>
                                                 <div className="yours messages">
                                                     <div>
@@ -593,7 +699,7 @@ const Chatrooms = () => {
                                                     </div>
                                                     <div className="message">
                                                         Create a new chatroom, or join an existing chatroom from the left pane!
-                                                        <br/><br/>
+                                                        <br /><br />
                                                         You can add/remove participants, or join a Jitsi Meet
                                                         call by clicking on the top-right icons of the chatroom pane.
                                                     </div>
@@ -655,7 +761,7 @@ const Chatrooms = () => {
                                                     <textarea ref={chatInputRef} type="text" placeholder="Add chat" style={{ height: "80px" }} className="stylized-input"
                                                         onKeyDown={e => {
                                                             if (e.key === "Enter" && !e.shiftKey) {
-                                                                if (chatInputRef.current.value.replace(/\s/g,'') != "") {
+                                                                if (chatInputRef.current.value.replace(/\s/g, '') != "") {
                                                                     addChatLive(e.target.value);
                                                                 }
                                                                 chatInputRef.current.value = "";
@@ -674,7 +780,7 @@ const Chatrooms = () => {
                             </div>
                         }
 
-                        
+
                     </div>
                 </div>
             </div>

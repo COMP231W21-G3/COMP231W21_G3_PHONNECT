@@ -45,6 +45,21 @@ const AllPosts = () => {
         setSkip(newSkip);
     }
 
+    const deletePost = (postId) => {
+        fetch(`/deletepost/${postId}`, {
+            method: "delete",
+            headers: {
+                "Authorization": "Bearer " + localStorage.getItem("jwt")
+            }
+        })
+            .then(res => res.json())
+            .then(result => {
+                console.log(result);
+                history.push('/');
+                M.toast({ html: "Deleted Post Successfully!", classes: "#43a047 green darken-1" });
+            })
+    }
+
     return (
         <div className="home">
 
