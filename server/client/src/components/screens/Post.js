@@ -122,6 +122,8 @@ const Post = () => {
                 console.log(result);
                 history.push('/');
                 M.toast({ html: "Deleted Post Successfully!", classes: "#43a047 green darken-1" });
+            })
+        };
 
     const deleteComment = (postId, commentId) => {
 

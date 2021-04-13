@@ -6,6 +6,7 @@ import M from 'materialize-css';
 import { Link } from 'react-router-dom';
 
 const Home = () => {
+    const history = useHistory();
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(false);
     const { state, dispatch } = useContext(UserContext);
