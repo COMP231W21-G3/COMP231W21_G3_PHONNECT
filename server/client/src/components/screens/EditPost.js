@@ -40,7 +40,7 @@ const EditPost = () => {
     useEffect(() => {       
         if (urls) {
             fetch(`/editpost/${postId}`, {
-                method: "post",
+                method: "get",
                 headers: {
                     "Content-Type": "application/json",
                     "Authorization": "Bearer " + localStorage.getItem("jwt")
