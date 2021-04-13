@@ -105,4 +105,76 @@ router.post('/signin', (req, res) => {
         })
 });
 
+router.put('/editaccountsettings', requireLogin, (req, res) => {
+    console.log(req.user);
+    const { username, email, password, oldUsername, oldEmail, oldPassword } = req.body;
+    if (!oldEmail || !oldPassword || !oldUsername) {
+        return res.status(422).json({ error: "Please add all the required fields" });
+    }
+
+    if (oldEmail === req.user.email && oldUsername === req.user.username) {
+        bcrypt.compare(oldPassword, req.user.password)
+            .then(doMatch => {
+                if (doMatch) {
+                    User.findOne({ email: email })
+                        .then(
+                            (savedUser) => {
+                                if (savedUser && savedUser.email != req.user.email) {
+                                    return res.status(422).json({ error: "Email already existed" });
+                                }
+                                User.findOne({ username: username })
+                                    .then(
+                                        (savedUser) => {
+                                            if (savedUser && savedUser.username != req.user.username) {
+                                                return res.status(422).json({ error: "Username already existed" });
+                                            }
+                                            bcrypt.hash(password ? password : oldPassword, 12) //12 is level of security. default is 10
+                                                .then(hashedPassword => {
+                                                    const userUpdate = {
+                                                        email: email ? email : oldEmail,
+                                                        username: username ? username : oldUsername,
+                                                        password: hashedPassword,
+                                                    }
+                                                    User.findByIdAndUpdate(req.user._id, userUpdate, (err, user) => {
+                                                        if (err) {
+                                                            return res.status(422).json({ error: err });
+                                                        }
+
+                                                        transporter.sendMail({
+                                                            to: user.email,
+                                                            from: "phongstagramherokuapp@gmail.com",
+                                                            subject: "Edit Account Settings Success!",
+                                                            html: "<h1>Edited Account Settings!</h1> <img style='width:300px;' src='cid:unique@kreata.ee'/>",
+                                                            attachments: [{
+                                                                filename: 'phongstagram_thumbnail.png',
+                                                                path: 'https://res.cloudinary.com/phongcloudinary/image/upload/v1602559179/phongstagram_thumb_qqiduz.png',
+                                                                cid: 'unique@kreata.ee' //same cid value as in the html img src
+                                                            }]
+                                                        })
+
+                                                        res.json({ message: "Edited Account Settings successfully" });
+                                                    })
+                                                        .catch(err => {
+                                                            console.log(err);
+                                                        })
+                                                })
+                                        })
+                                    .catch(err => {
+                                        console.log(err);
+                                    })
+                            }).catch(err => {
+                                console.log(err);
+                            })
+                }
+                else{
+                    return res.status(422).json({ error: "Not currently logged in user!" });            
+                }
+            })
+    }
+    else {
+        return res.status(422).json({ error: "Not currently logged in user!" });
+    }
+});
+
+
 module.exports = router;
