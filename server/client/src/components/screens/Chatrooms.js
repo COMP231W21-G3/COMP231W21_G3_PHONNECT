@@ -548,6 +548,23 @@ const Chatrooms = () => {
                 </div>
             </div>
 
+            <div id="removeParticipantModal" className="modal modal-fixed-footer small-modal">
+                <div className="modal-content">
+                    <h4 className="styled-title">Remove Participant</h4>
+                    <p>Are you sure you want to remove this participant? </p>
+                    <p className="red-text">(Removing the last participant will result in deletion of the chatroom and its chats)</p>
+                </div>
+                <div className="modal-footer">
+                    <a href="#!" className="modal-close btn-flat red-text"
+                        onClick={() => {
+                            removeParticipantLive(participantToRemove);
+                            setParticipantToRemove({});
+                        }}
+                    >Remove Participant</a>
+                    <a className="modal-close btn-flat">Close</a>
+                </div>
+            </div>
+
             <div className="row" style={{ maxWidth: "800px", margin: "20px auto" }}>
                 <div className="col s12" style={{ marginBottom: "10px" }}>
                     <a id="showParticipantModal" className="btn-floating btn-large waves-effect waves-light #1976d2 blue darken-1 modal-trigger" data-target="searchParticipantModal"
