@@ -548,6 +548,70 @@ const Chatrooms = () => {
                 </div>
             </div>
 
+            <div id="searchAddParticipantModal" className="modal modal-fixed-footer small-modal" ref={searchAddParticipantModal}>
+                <div className="modal-content">
+                    <h4 className="styled-title">Search Participants To Add</h4>
+
+                    <div style={{ display: "flex", flexWrap: "wrap" }}>
+                        {
+                            state && searchAddParticipantsSelected ?
+                                searchAddParticipantsSelected.map(item => {
+                                    return <div key={item._id} className="#bbdefb blue lighten-4 chip"
+                                        
+                                    >
+                                        {item.username}
+                                        {
+                                            item._id !== state._id &&
+                                            <i className="material-icons blue-text"
+                                                style={{ cursor: "pointer", fontSize: "18px", marginLeft: "5px", verticalAlign: "middle" }}
+                                                onClick={() => { removeSearchAddParticipantSelected(item) }}>cancel</i>
+                                        }
+
+                                    </div>
+                                })
+                                : <></>
+                        }
+                    </div>
+
+                    <input
+                        type="text"
+                        placeholder="search participants to add"
+                        value={searchAddParticipant}
+                        onChange={(e) => fetchSearchAddParticipants(e.target.value)}
+                    />
+
+                    <ul className="collection">
+                        {
+                            state ?
+                                addParticipantDetails.map(item => {
+                                    return (
+                                        !searchParticipantsSelected.some(a => a._id === item._id) ?
+                                            <li key={item._id} className="collection-item avatar" onClick={() => { addSearchAddParticipantsSelected(item) }} style={{ cursor: "pointer" }}>
+                                                <img src={item.profPic} alt="" className="circle" />
+                                                <h6 style={{ fontWeight: "500" }} className="title">{item.username}</h6>
+                                            </li>
+                                            :
+                                            <li key={item._id} className="collection-item avatar #bbdefb blue lighten-4" onClick={() => { removeSearchAddParticipantSelected(item) }} style={{ cursor: "pointer" }}>
+                                                <img src={item.profPic} alt="" className="circle" />
+                                                <h6 style={{ fontWeight: "500" }} className="title">{item.username}</h6>
+                                            </li>
+                                    )
+                                }) : null
+                        }
+                    </ul>
+                </div>
+                <div className="modal-footer">
+                    <a className="btn-flat blue-text"
+                        onClick={() =>
+                            loading && openChatroomLoading ?
+                                null :
+                                addParticipantsLive()}
+                                >
+                        Add Participant(s)</a>
+                    <a className="modal-close btn-flat">Close</a>
+                </div>
+            </div>
+
             <div id="removeParticipantModal" className="modal modal-fixed-footer small-modal">
                 <div className="modal-content">
                     <h4 className="styled-title">Remove Participant</h4>
