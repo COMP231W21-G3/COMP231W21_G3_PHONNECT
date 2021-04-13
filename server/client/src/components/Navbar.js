@@ -120,7 +120,7 @@ const NavBar = () => {
                             dispatch({type:"CLEAR_SOCKET_JWT"});
                         }}
 
-                    ><span style={{color:"red"}}>Sign Out</span></Link></li>
+                    ><span style={{color:"red"}}>Sign Out</span></Link></li> 
                 </>
             )
         }
