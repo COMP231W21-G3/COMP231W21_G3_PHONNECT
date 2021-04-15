@@ -33,7 +33,8 @@ const Profile = () => {
             data.append("file", image);
             data.append("upload_preset", "phongstagram");
             data.append("cloud_name", "phongcloudinary");
-            fetch("https://api.cloudinary.com/v1_1/phongcloudinary/image/upload", {
+
+            fetch("https://api.cloudinary.com/v1_1/phongcloudinary/image/upload", { 
                 method: "post",
                 body: data
             })

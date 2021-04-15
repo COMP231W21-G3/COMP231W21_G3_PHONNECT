@@ -5,7 +5,7 @@ import { UserContext } from '../../App';
 import M from 'materialize-css';
 import { Link } from 'react-router-dom';
 
-const AllPosts = () => {
+const ModAllPosts = () => {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(false);
     const { state, dispatch } = useContext(UserContext);
@@ -18,47 +18,12 @@ const AllPosts = () => {
         getPosts({ skip, limit });
     }, [])
 
-    const getPosts = (variables) => {
-        fetch('/allposts', {
-            method: "post",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": "Bearer " + localStorage.getItem("jwt")
-            },
-            body: JSON.stringify({
-                skip: variables.skip,
-                limit: variables.limit
-            })
-        })
-            .then(res => res.json())
-            .then(result => {
-                console.log(result);
-                setLoading(false);
-                setData([...data, ...result.posts]);
-                setPostsSize(result.postsSize);
-            })
-    }
-
     const onLoadMore = () => {
         let newSkip = skip + limit;
         getPosts({ skip: newSkip, limit });
         setSkip(newSkip);
     }
 
-    const deletePost = (postId) => {
-        fetch(`/deletepost/${postId}`, {
-            method: "delete",
-            headers: {
-                "Authorization": "Bearer " + localStorage.getItem("jwt")
-            }
-        })
-            .then(res => res.json())
-            .then(result => {
-                console.log(result);
-                history.push('/');
-                M.toast({ html: "Deleted Post Successfully!", classes: "#43a047 green darken-1" });
-            })
-    }
 
     return (
         <div className="home">
@@ -109,4 +74,4 @@ const AllPosts = () => {
     )
 }
 
-export default AllPosts
+export default ModAllPosts

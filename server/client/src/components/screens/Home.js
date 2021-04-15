@@ -6,6 +6,7 @@ import M from 'materialize-css';
 import { Link } from 'react-router-dom';
 
 const Home = () => {
+    const history = useHistory();
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(false);
     const { state, dispatch } = useContext(UserContext);
@@ -36,6 +37,21 @@ const Home = () => {
                 setLoading(false);
                 setData([...data, ...result.posts]);
                 setPostsSize(result.postsSize);
+            })
+    }
+
+    const deletePost = (postId) => {
+        fetch(`/deletepost/${postId}`, {
+            method: "delete",
+            headers: {
+                "Authorization": "Bearer " + localStorage.getItem("jwt")
+            }
+        })
+            .then(res => res.json())
+            .then(result => {
+                console.log(result);
+                history.push('/');
+                M.toast({ html: "Deleted Post Successfully!", classes: "#43a047 green darken-1" });
             })
     }
 

@@ -119,6 +119,19 @@ const UserProfile = () => {
                                         <img src={item.profPic} alt="" className="circle" />
                                         <h6 style={{ fontWeight: "500" }} className="title">{item.username}</h6>
                                     </Link>
+
+                                    {
+                                        state._id === item._id ?
+                                            null :
+                                            !state.following || (state.following && !state.following.some(user => user._id === item._id)) ?
+                                                <button className="secondary-content btn-small waves-effect waves-light #1976d2 blue darken-1"
+                                                    onClick={() => followUserInModal(item._id)}>
+                                                    Follow</button>
+                                                :
+                                                <button className="secondary-content btn-small waves-effect waves-light #ef5350 red lighten-1"
+                                                    onClick={() => unfollowUserInModal(item._id)}>
+                                                    Unfollow</button>
+                                    }
                                 </li>
                             })
                             : null}
