@@ -5,7 +5,8 @@ const requireLogin = require('../middleware/requireLogin');
 const Post = mongoose.model("Post");
 const User = mongoose.model("User");
 
-router.post('/allposts', requireLogin, (req, res) => {
+router.post('/allposts', requireLogin, (req, res) => { 
+    
     let skip=parseInt(req.body.skip);
     let limit=parseInt(req.body.limit);
 
