@@ -12,13 +12,14 @@ import { reducer, initialState } from './reducers/userReducer';
 import { socketReducer, socketInitialState } from './reducers/socketReducer';
 import AllPosts from './components/screens/AllPosts';
 import Post from './components/screens/Post';
-import EditPost from './components/screens/EditPost';
-import Chatrooms from './components/screens/Chatrooms'; 
+import ResetPassword from './components/screens/ResetPassword';
+import NewPassword from './components/screens/NewPassword';
+import Chatrooms from './components/screens/Chatrooms';
+import JitsiRoom from './components/screens/JitsiRoom';
 import VoiceCommand from './components/VoiceCommand';
-import EditAccount from './components/EditAccount';
-import ModAllPosts from './components/EditAccount';
-
-
+import EditPost from './components/screens/EditPost';
+import EditAccountSettings from './components/screens/EditAccountSettings';
+import CreateServiceRequest from './components/screens/CreateServiceRequest';
 
 export const UserContext = createContext();
 export const SocketContext=createContext();
@@ -54,9 +55,6 @@ const Routing = () => {
       <Route path="/signup">
         <Signup />
       </Route>
-      <Route path="/editaccount">
-        <EditAccount />
-      </Route>
       <Route path="/createpost">
         <CreatePost />
       </Route>
@@ -75,11 +73,26 @@ const Routing = () => {
       <Route path="/post/:postId">
         <Post/>
       </Route>
-      <Route path="/editpost/:postId">
-        <EditPost/>
+      <Route exact path="/resetpassword">
+        <ResetPassword/>
+      </Route>
+      <Route path="/resetpassword/:token">
+        <NewPassword/>
       </Route>
       <Route path="/chatrooms">
         <Chatrooms/>
+      </Route>
+      <Route path="/videocall/:roomId">
+        <JitsiRoom/>
+      </Route>
+      <Route path="/editpost/:postId">
+        <EditPost/>
+      </Route>
+      <Route path="/editaccountsettings">
+        <EditAccountSettings/>
+      </Route>
+      <Route path="/createservicerequest">
+        <CreateServiceRequest/>
       </Route>
     </Switch>
   )

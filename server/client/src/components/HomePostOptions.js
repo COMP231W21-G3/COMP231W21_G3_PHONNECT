@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-const HomePostOptions = ({ item, state, deletePost }) => {
+const HomePostOptions = ({ item, state, deletePost, followUser, unfollowUser }) => {
     return (
         <div className="collection">
             <Link to={`/post/${item._id}`} className="collection-item">View Post</Link>

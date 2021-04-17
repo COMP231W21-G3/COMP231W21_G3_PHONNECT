@@ -46,6 +46,12 @@ const Signup = () => {
             return;
         }
 
+        if(password.length<6){
+            M.toast({ html: "Password cannot be less than 6 characters!", classes: "#c62828 red darken-1" });
+            setLoading(false);
+            return;
+        }
+
         fetch("/signup", {
             method: "post",
             headers: {
@@ -86,7 +92,7 @@ const Signup = () => {
     return (
         <div className="mycard">
             <div className="card auth-card input-field">
-                <h2>Phongstagram</h2>
+                <h2>Phonnect</h2>
                 <input
                     type="text"
                     placeholder="email"

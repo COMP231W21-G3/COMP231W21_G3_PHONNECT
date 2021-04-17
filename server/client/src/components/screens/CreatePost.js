@@ -34,6 +34,11 @@ const CreatePost = () => {
         setUrls(copyUrls);
     }
 
+    const removeImage=(im)=>{
+        const newImages=images.filter(image=>image.name!=im.name);
+        setImages(newImages);
+    }
+
     useEffect(() => {       
         if (urls) {
             fetch("/createpost", {
@@ -83,10 +88,20 @@ const CreatePost = () => {
                     images.length === 0 ? <img className="upload-img" src="https://www.worldloppet.com/wp-content/uploads/2018/10/no-img-placeholder.png" />
                         :
                         images.map((im, i) =>im.name.substring(im.name.lastIndexOf('.')+1,im.name.length).match(/(jpg|jpeg|png|gif)$/i)?
-                        <img className="upload-img" key={i}
-                                src={images.length > 0 ? URL.createObjectURL(im) : null}></img>    
-                        :<video className="upload-img" key={i} frameBorder="0" controls
-                                src={images.length > 0 ? URL.createObjectURL(im) : null}></video>)
+                        <div key={i} style={{position:"relative"}}>
+                        <img className="upload-img"
+                                src={images.length > 0 ? URL.createObjectURL(im) : null}></img>
+                        <a className="btn-floating red" style={{position:"absolute",right:"0px",top:"0px",zIndex:"1",cursor:"pointer"}}>
+                            <i className="small material-icons col s2" onClick={()=>removeImage(im)}>delete</i></a>
+                        </div>
+                        
+                        :
+                        <div key={i} style={{position:"relative"}}>
+                        <video className="upload-img" frameBorder="0" controls
+                                src={images.length > 0 ? URL.createObjectURL(im) : null}></video>
+                        <a className="btn-floating red" style={{position:"absolute",right:"0px",top:"0px",zIndex:"1",cursor:"pointer"}}>
+                            <i className="small material-icons col s2" onClick={()=>removeImage(im)}>delete</i></a>
+                        </div>)
                 }
             </div>
             <div className="file-field input-field">

@@ -158,6 +158,31 @@ router.put('/comment', requireLogin, (req, res) => {
         })
 })
 
+router.put('/editpost/:postId', requireLogin, (req, res) => {
+    const { caption, photos } = req.body;
+    if (!caption || photos.length === 0) {
+        return res.status(422).json({ error: "Please add all field!" });
+    }
+
+    Post.findByIdAndUpdate(req.params.postId, {
+        caption,
+        photos
+    }, {
+        new: true
+    })
+        .populate("likes", "_id username profPic")
+        .populate("comments.postedBy", "_id username profPic")
+        .populate("postedBy", "_id username profPic")
+        .exec((err, result) => {
+            if (err) {
+                return res.status(422).json({ error: err });
+            }
+            else {
+                res.json(result);
+            }
+        })
+})
+
 router.delete('/deletepost/:postId', requireLogin, (req, res) => {
     Post.findOne({ _id: req.params.postId })
         .populate("postedBy", "_id")
@@ -197,30 +222,5 @@ router.put("/deletecomment/:postId/:commentId", requireLogin, (req, res) => {
             }
         });
 });
-
-router.put('/editpost/:postId', requireLogin, (req, res) => {
-    const { caption, photos } = req.body;
-    if (!caption || photos.length === 0) {
-        return res.status(422).json({ error: "Please add all field!" });
-    }
-
-    Post.findByIdAndUpdate(req.params.postId, {
-        caption,
-        photos
-    }, {
-        new: true
-    })
-        .populate("likes", "_id username profPic")
-        .populate("comments.postedBy", "_id username profPic")
-        .populate("postedBy", "_id username profPic")
-        .exec((err, result) => {
-            if (err) {
-                return res.status(422).json({ error: err });
-            }
-            else {
-                res.json(result);
-            }
-        })
-})
 
 module.exports = router;

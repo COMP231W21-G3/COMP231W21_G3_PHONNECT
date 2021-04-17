@@ -328,15 +328,6 @@ const Chatrooms = () => {
         return () => socket&&socket.removeAllListeners("remove participant success");
     })
 
-
-    // const openVideoChatRoom = () => {
-    //     socket && socket.emit("open videochat room", { chatroom: openedChatroom.chatroom, currentUser: state });
-    // }
-
-    // const closeVideoChatRoom=()=>{
-    //     socket&&socket.emit("close videochat room",{chatroom:openedChatroom.chatroom,currentUser:state});
-    // }
-
     const selectHobby=(hobby)=>{
         setSelectedHobbies([...selectedHobbies, hobby]);
     }
@@ -879,11 +870,10 @@ const Chatrooms = () => {
                                         <span style={{ fontSize: "24px", fontWeight: "300" }}>Participants</span>
 
 
-
                                         {openedChatroom && openedChatroom.chatroom &&
                                             <ul className="collection">
                                                 {
-                                                    openedChatroom.chatroom.participants.map((record) => {
+                                                    openedChatroom.chatroom.participants.filter(p=>p._id!=state._id).map((record) => {
                                                         return (
 
                                                             <li key={record._id} className="collection-item avatar">
@@ -907,8 +897,23 @@ const Chatrooms = () => {
                                                 }
                                             </ul>
                                         }
+
+
+                                            <p>
+                                                <a className="btn waves-effect waves-light #ef5350 red lighten-1 modal-trigger white-text"
+                                                    data-target="removeParticipantModal"
+                                                    onClick={() => {
+                                                        setParticipantToRemove(state);
+                                                    }}>
+                                                    Leave Chatroom</a>
+                                            </p>
                                     </>
                             }
+
+
+                                    </>
+                            }
+
 
                         </div>}
                     </div>

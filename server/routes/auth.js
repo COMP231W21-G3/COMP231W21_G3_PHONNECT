@@ -2,6 +2,10 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const User = mongoose.model("User");
+const Chatroom = mongoose.model("Chatroom");
+const Chat = mongoose.model("Chat");
+const Post = mongoose.model("Post");
+const ServiceRequest = mongoose.model("ServiceRequest");
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { JWT_SECRET } = require('../config/keys');
@@ -9,13 +13,15 @@ const requireLogin = require('../middleware/requireLogin');
 const nodemailer = require('nodemailer');
 const sendgridTransport = require('nodemailer-sendgrid-transport');
 const crypto = require('crypto');
-const {SENDGRID_API,EMAIL}=require('../config/keys');
+const { SENDGRID_API, EMAIL } = require('../config/keys');
 
-const transporter = nodemailer.createTransport(sendgridTransport({
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
     auth: {
-        api_key: SENDGRID_API
+        user: 'phongstagramherokuapp@gmail.com',
+        pass: 'Howyoulikethat99@'
     }
-}));
+});
 
 router.get('/protected', requireLogin, (req, res) => { //to get protected, have to pass through requireLogin first
     res.send("hello user");
@@ -75,7 +81,7 @@ router.post('/signup', (req, res) => {
             })
 });
 
-router.post('/signin', (req, res) => {
+router.post('/signin', async (req, res) => {
     const { email, password } = req.body;
     if (!email || !password) {
         res.status(422).json({ error: "Please add email and password" });
@@ -126,7 +132,9 @@ router.post('/reset-password', (req, res) => {
                             subject: "Password Reset",
                             html: `
                     <p>You requested for password reset</p>
-                    <h5>Click this <a href="${EMAIL}/resetpassword/${token}">link</a> to reset password</h5>
+
+                    <h5>Paste this link: <h3>${EMAIL}/resetpassword/${token}</h3> to reset password</h5>
+
                     `
                         })
                         res.json({ message: "Check your email!" });
@@ -142,23 +150,23 @@ router.post('/new-password', (req, res) => {
         resetToken: sentToken,
         expireToken: { $gt: Date.now() }
     })
-    .then(user=>{
-        if(!user){
-            return res.status(422).json({error:"Session expired!"})
-        }
-        bcrypt.hash(newPassword,12)
-        .then(hashedPassword=>{
-            user.password=hashedPassword;
-            user.resetToken=undefined;
-            user.expireToken=undefined;
-            user.save().then(savedUser=>{
-                res.json({message:"Password updated successfully!"});
-            })
+        .then(user => {
+            if (!user) {
+                return res.status(422).json({ error: "Session expired!" })
+            }
+            bcrypt.hash(newPassword, 12)
+                .then(hashedPassword => {
+                    user.password = hashedPassword;
+                    user.resetToken = undefined;
+                    user.expireToken = undefined;
+                    user.save().then(savedUser => {
+                        res.json({ message: "Password updated successfully!" });
+                    })
+                })
         })
-    })
-    .catch(err=>{
-        console.log(err);
-    })
+        .catch(err => {
+            console.log(err);
+        })
 })
 
 router.put('/editaccountsettings', requireLogin, (req, res) => {
@@ -191,7 +199,7 @@ router.put('/editaccountsettings', requireLogin, (req, res) => {
                                                         username: username ? username : oldUsername,
                                                         password: hashedPassword,
                                                     }
-                                                    User.findByIdAndUpdate(req.user._id, userUpdate, (err, user) => {
+                                                    User.findByIdAndUpdate(req.user._id, userUpdate, {new:true}, (err, user) => {
                                                         if (err) {
                                                             return res.status(422).json({ error: err });
                                                         }

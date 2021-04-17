@@ -10,6 +10,47 @@ const NavBar = () => {
     const [search, setSearch] = useState("");
     const [userDetails, setUserDetails] = useState([]);
 
+    const renderList = () => {
+        if (state) { //state will be populated with user details on USER action, else it will be initialState null
+            return (
+                <>
+                    <li><a className="modal-trigger" href="#searchModal">
+                        <i className="small material-icons navbar-icons">search</i>
+                    </a></li>
+
+                    {
+                        state.username!="admin"
+                        ?
+                        <li><Link to="/"><i className="small material-icons navbar-icons">home</i></Link></li>
+                        :
+                        <li><Link to="/allposts"><i className="small material-icons navbar-icons">public</i></Link></li>
+                    }
+
+                    <li><Link to="/profile"><i className="small material-icons navbar-icons">account_circle</i></Link></li>
+                    <li><Link to="/createpost"><i className="small material-icons navbar-icons">add_circle_outline</i></Link></li>
+                    <li><Link to="/chatrooms"><i className="small material-icons navbar-icons">forum</i></Link></li>
+                    <li><Link to="/createservicerequest"><i className="small material-icons navbar-icons">live_help</i></Link></li>
+                    <li><Link to="/editaccountsettings"><i className="small material-icons navbar-icons">settings</i></Link></li>
+                    <li><Link to="/signin"
+                        onClick={() => {
+                            localStorage.clear();
+                            dispatch({ type: "CLEAR" });
+                            socketDispatch({type:"CLEAR_SOCKET_JWT"});
+                        }}
+                    ><i className="small material-icons" style={{color:"red"}}>exit_to_app</i></Link></li>
+                </>
+            )
+        }
+        else {
+            return (
+                <>
+                    <li><Link to="/signin">Sign In</Link></li>
+                    <li><Link to="/signup">Sign Up</Link></li>
+                </>
+            )
+        }
+    }
+
     const fetchUsers = (query) => {
         setSearch(query);
         fetch('/search-users', {
@@ -26,7 +67,7 @@ const NavBar = () => {
                 setUserDetails(results.users);
             })
     }
-    
+
     const followUser = (followId) => {
         fetch('/follow', {
             method: "put",
@@ -66,41 +107,6 @@ const NavBar = () => {
             })
     }
 
-
-
-
-    const renderList = () => {
-        if (state) { //state will be populated with user details on USER action, else it will be initialState null
-            return (
-                <>
-                    <li><a className="modal-trigger" href="#searchModal">
-                        <i className="small material-icons navbar-icons">search</i>
-                    </a></li>
-                    <li><Link to="/"><i className="small material-icons navbar-icons">home</i></Link></li>
-                    <li><Link to="/allposts"><i className="small material-icons navbar-icons">public</i></Link></li>
-                    <li><Link to="/profile"><i className="small material-icons navbar-icons">account_circle</i></Link></li>
-                    <li><Link to="/createpost"><i className="small material-icons navbar-icons">add_circle_outline</i></Link></li>
-                    <li><Link to="/chatrooms"><i className="small material-icons navbar-icons">forum</i></Link></li>
-                    <li><Link to="/signin"
-                        onClick={() => {
-                            localStorage.clear();
-                            dispatch({ type: "CLEAR" });
-                            dispatch({type:"CLEAR_SOCKET_JWT"});
-                        }}
-                    ><i className="small material-icons" style={{color:"red"}}>exit_to_app</i></Link></li>
-                </>
-            )
-        }
-        else {
-            return (
-                <>
-                    <li><Link to="/signin">Sign In</Link></li>
-                    <li><Link to="/signup">Sign Up</Link></li>
-                </>
-            )
-        }
-    }
-
     const renderMobileList = () => {
         if (state) {
             return (
@@ -108,11 +114,19 @@ const NavBar = () => {
                     <li className="sidenav-close"><a className="modal-trigger" href="#searchModal">
                         Search
                     </a></li>
-                    <li className="sidenav-close"><Link to="/">Home</Link></li>
-                    <li className="sidenav-close"><Link to="/allposts">All Posts</Link></li>
+                    {
+                        state.username!="admin"
+                        ?
+                        <li className="sidenav-close"><Link to="/">Home</Link></li>
+                        :
+                        <li className="sidenav-close"><Link to="/allposts">All Posts</Link></li>
+                    }
+                               
                     <li className="sidenav-close"><Link to="/profile">Profile</Link></li>
                     <li className="sidenav-close"><Link to="/createpost">Create Post</Link></li>
                     <li className="sidenav-close"><Link to="/chatrooms">Chatrooms</Link></li>
+                    <li className="sidenav-close"><Link to="/createservicerequest">Send Service Request</Link></li>
+                    <li className="sidenav-close"><Link to="/editaccountsettings">Edit Account Settings</Link></li>
                     <li className="sidenav-close"><Link to="/signin"
                         onClick={() => {
                             localStorage.clear();
@@ -144,7 +158,7 @@ const NavBar = () => {
     return (
         <>
             <div className="navbar-fixed">
-            <div id="searchModal" className="modal modal-fixed-footer small-modal" ref={searchModal}>
+                <div id="searchModal" className="modal modal-fixed-footer small-modal" ref={searchModal}>
                     <div className="modal-content">
                         <h4 className="styled-title">Search</h4>
                         <input
@@ -189,7 +203,8 @@ const NavBar = () => {
                     <div className="modal-footer">
                         <a className="modal-close btn-flat">Close</a>
                     </div>
-                </div> 
+                </div>
+
                 <nav>
                     <div className="nav-wrapper white">
 
