@@ -55,7 +55,7 @@ const EditAccountSettings = () => {
             body: JSON.stringify({
                 oldEmail,
                 oldUsername,
-                oldPassword,
+                oldPassword, 
                 email,
                 username,
                 password

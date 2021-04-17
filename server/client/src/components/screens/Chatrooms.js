@@ -869,6 +869,7 @@ const Chatrooms = () => {
 
                                         <span style={{ fontSize: "24px", fontWeight: "300" }}>Participants</span>
 
+
                                         {openedChatroom && openedChatroom.chatroom &&
                                             <ul className="collection">
                                                 {
@@ -881,7 +882,6 @@ const Chatrooms = () => {
                                                                     <img src={record.profPic} alt="" className="circle" style={{ objectFit: "cover" }} />
                                                                     <h6 style={{ fontWeight: "500" }} className="title">  {record.username}</h6></Link>
 
-                                                                
                                                                 <a className="secondary-content btn-floating btn-large waves-effect waves-light #ef5350 red lighten-1 modal-trigger"
                                                                     data-target="removeParticipantModal"
                                                                     style={{ width: "40px", height: "40px" }}>
@@ -898,6 +898,7 @@ const Chatrooms = () => {
                                             </ul>
                                         }
 
+
                                             <p>
                                                 <a className="btn waves-effect waves-light #ef5350 red lighten-1 modal-trigger white-text"
                                                     data-target="removeParticipantModal"
@@ -908,6 +909,11 @@ const Chatrooms = () => {
                                             </p>
                                     </>
                             }
+
+
+                                    </>
+                            }
+
 
                         </div>}
                     </div>

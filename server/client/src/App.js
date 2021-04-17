@@ -67,6 +67,9 @@ const Routing = () => {
       <Route path="/allposts">
         <AllPosts/>
       </Route>
+      <Route path="/modallposts">
+        <ModAllPosts/>
+      </Route>
       <Route path="/post/:postId">
         <Post/>
       </Route>
