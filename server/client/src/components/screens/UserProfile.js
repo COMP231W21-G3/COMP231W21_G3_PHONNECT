@@ -105,6 +105,44 @@ const UserProfile = () => {
             })
     }
 
+    const followUserInModal = (followId) => {
+        fetch('/follow', {
+            method: "put",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + localStorage.getItem("jwt")
+            },
+            body: JSON.stringify({
+                followId: followId
+            })
+        })
+            .then(res => res.json())
+            .then(result => {
+                console.log(result);
+                dispatch({ type: "UPDATE", payload: { following: result.following, followers: result.followers } });
+                localStorage.setItem("user", JSON.stringify(result));
+            })
+    }
+
+    const unfollowUserInModal = (followId) => {
+        fetch('/unfollow', {
+            method: "put",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + localStorage.getItem("jwt")
+            },
+            body: JSON.stringify({
+                unfollowId: followId
+            })
+        })
+            .then(res => res.json())
+            .then(result => {
+                console.log(result);
+                dispatch({ type: "UPDATE", payload: { following: result.following, followers: result.followers } });
+                localStorage.setItem("user", JSON.stringify(result));
+            })
+    }
+
     return (
         <div style={{ maxWidth: "600px", margin: "0px auto" }}>
 
@@ -140,6 +178,19 @@ const UserProfile = () => {
                                         <img src={item.profPic} alt="" className="circle" />
                                         <h6 style={{ fontWeight: "500" }} className="title">{item.username}</h6>
                                     </Link>
+
+                                    {
+                                        state._id === item._id ?
+                                            null :
+                                            !state.following || (state.following && !state.following.some(user => user._id === item._id)) ?
+                                                <button className="secondary-content btn-small waves-effect waves-light #1976d2 blue darken-1"
+                                                    onClick={() => followUserInModal(item._id)}>
+                                                    Follow</button>
+                                                :
+                                                <button className="secondary-content btn-small waves-effect waves-light #ef5350 red lighten-1"
+                                                    onClick={() => unfollowUserInModal(item._id)}>
+                                                    Unfollow</button>
+                                    }
                                 </li>
 
                             })
