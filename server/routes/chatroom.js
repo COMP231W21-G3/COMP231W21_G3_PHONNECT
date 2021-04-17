@@ -53,23 +53,30 @@ const createChatroomLive = (socket, io) => {
 }
 
 const openChatroomLive = (socket, io) => {
-    socket.on("open chatroom", chatroomId => {
-        Chatroom.findOne({ _id: chatroomId })
+    socket.on("open chatroom", data => {
+        const {chatroomId,currentUserId}=data;
+        Chatroom.findOneAndUpdate({ _id: chatroomId },{
+            $addToSet: { lastSeenBy:currentUserId}
+        }, {
+            new: true
+        })
             .populate("participants", "_id username profPic")
-            .then(chatroom => {
-                Chat.find({ inChatRoom: chatroomId })
+            .exec((err,chatroom) => {
+                if(err){
+                    console.log(err);
+                }
+                else{
+                    Chat.find({ inChatRoom: chatroomId })
                     .populate("sender", "_id username profPic")
                     .then(chats => {
-                        socket.leave(socket.room);
+                        socket.leaveAll();
                         socket.join(chatroomId);
                         socket.emit("open chatroom success", { chatroom, chats });
                     })
                     .catch(err => {
                         console.log(err);
                     })
-            })
-            .catch(err => {
-                console.log(err);
+                }
             })
     })
 }
@@ -77,6 +84,10 @@ const openChatroomLive = (socket, io) => {
 const addChatLive = (socket, io) => {
     socket.on("add chat", data => {
         const { message, image, sender, inChatRoom } = data;
+
+        // console.log(io.sockets.adapter.rooms.get(inChatRoom._id));
+        // console.log(io.sockets.adapter.rooms.get(inChatRoom._id).has(socket.id));
+
         const chat = new Chat({
             message,
             image,
@@ -88,9 +99,21 @@ const addChatLive = (socket, io) => {
                 Chat.findById(savedChat._id)
                     .populate("sender", "_id username profPic")
                     .then(chat => {
-                        io.sockets.in(inChatRoom._id).emit("add chat success",
-                            chat
-                        );
+                        Chatroom.findByIdAndUpdate(inChatRoom._id,{
+                              lastSeenBy: [sender] 
+                        }, {
+                            new: true
+                        })
+                        .exec((err, result) => {
+                            if (err) {
+                                
+                            }
+                            else {
+                                io.sockets.in(inChatRoom._id).emit("add chat success",
+                                    chat
+                                );
+                            }
+                        })
                     })
             })
             .catch(err => {
@@ -145,52 +168,6 @@ router.post('/search-add-participants', requireLogin, (req, res) => {
         })
 })
 
-router.post('/changeHobbies',requireLogin,(req,res)=>{
-    const {selectedHobbies}=req.body;
-
-    User.findByIdAndUpdate(req.user._id,{
-        hobbies:selectedHobbies
-    },{
-        new:true
-    })
-    .exec((err,user)=>{
-        if(err){
-            return res.status(422).json({ error: err });
-        }
-        else{
-            res.json({hobbies:user.hobbies});
-        }
-    })
-})
-
-router.post('/findMatch',requireLogin,(req,res)=>{
-    const {selectedHobbies}=req.body;
-
-    Chatroom.findOne(req.body.chatroom)
-        .then(
-            (savedChatroom) => {
-                if (savedChatroom) {
-                    if (req.body.query !== "") {
-                        User.find({ username: { $regex: userPattern }, _id: { $nin: savedChatroom.participants } })
-                            .select("_id username profPic")
-                            .then(searched_partis => {
-                                res.json({ searched_partis })
-                            })
-                            .catch(err => {
-                                console.log(err);
-                            })
-                    }
-                    else {
-                        res.json({ searched_partis: [] });
-                    }
-                }
-            }
-        )
-        .catch(err => {
-            console.log(err);
-        })
-})
-
 const addParticipantsLive = (socket, io) => {
     socket.on("add participants", data => {
         const { chatroom, partisToAdd } = data;
@@ -200,8 +177,8 @@ const addParticipantsLive = (socket, io) => {
             return socket.emit("add participants failed", error);
         }
 
-        Chatroom.findOneAndUpdate(chatroom, {
-            $push: { participants: partisToAdd }
+        Chatroom.findOneAndUpdate({_id:chatroom._id}, {
+            $addToSet: { participants: partisToAdd }
         }, {
             new: true
         })
@@ -237,7 +214,7 @@ const removeParticipantLive = (socket, io) => {
     socket.on("remove participant", data => {
         const { user, chatroom } = data;
 
-        Chatroom.findOneAndUpdate(chatroom, {
+        Chatroom.findOneAndUpdate({_id:chatroom._id}, {
             $pull: { participants: user._id }
         }, {
             new: true
@@ -290,7 +267,7 @@ const removeParticipantLive = (socket, io) => {
 const openVideoChatRoomLive = (socket, io) => {
     socket.on("open videochat room", data => {
         const { chatroom, currentUser } = data;
-        Chatroom.findOne(chatroom)
+        Chatroom.findOne({_id:chatroom._id})
             .then(savedChatroom => {
                 const chat = new Chat({
                     message: `${currentUser.username} joined video call`,
@@ -314,7 +291,7 @@ const openVideoChatRoomLive = (socket, io) => {
 const closeVideoChatRoomLive = (socket, io) => {
     socket.on("close videochat room", data => {
         const { chatroom, currentUser } = data;
-        Chatroom.findOne(chatroom)
+        Chatroom.findOne({_id:chatroom._id})
             .then(savedChatroom => {
                 const chat = new Chat({
                     message: `${currentUser.username} left video call`,
@@ -349,6 +326,57 @@ router.get('/videochatroom/:roomId',requireLogin,(req,res)=>{
     )
 })
 
+router.post('/changeHobbies',requireLogin,(req,res)=>{
+    const {selectedHobbies}=req.body;
+
+    User.findByIdAndUpdate(req.user._id,{
+        hobbies:selectedHobbies
+    },{
+        new:true
+    })
+    .exec((err,user)=>{
+        if(err){
+            return res.status(422).json({ error: err });
+        }
+        else{
+            res.json({hobbies:user.hobbies});
+        }
+    })
+})
+
+router.post('/findMatch',requireLogin,(req,res)=>{
+    const {selectedHobbies}=req.body;
+
+    User.aggregate([
+        {
+            $match: {
+                hobbies: { $in: selectedHobbies },
+                _id: { $ne: req.user._id }
+            }
+        },
+        {
+            $set: {
+                matchedCount: {
+                    $size: {
+                        $setIntersection: ["$hobbies", selectedHobbies]
+                    }
+                }
+            }
+        },
+        {
+            $sort: {
+                matchedCount: -1
+            }
+        }
+    ], (err, matches) => {
+        if (err) {
+            return res.status(422).json({ error: err });
+        }
+        else {
+            res.json({ matches });
+        }
+    });
+})
 
 module.exports = router;
 module.exports.createChatroomLive = createChatroomLive;
