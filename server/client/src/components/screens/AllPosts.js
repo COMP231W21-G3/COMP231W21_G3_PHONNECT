@@ -1,11 +1,8 @@
 import React, { useState, useEffect, useContext } from 'react';
 import CarouselSlider from '../CarouselSlider';
-import HomePostOptions from '../HomePostOptions';
 import PreLoader from '../Preloader';
 import { UserContext } from '../../App';
 import M from 'materialize-css';
-import CommentsModal from '../CommentsModal';
-import LikesModal from '../LikesModal';
 import { Link } from 'react-router-dom';
 
 const AllPosts = () => {
@@ -15,7 +12,6 @@ const AllPosts = () => {
     const [skip, setSkip] = useState(0);
     const [limit, setLimit] = useState(4);
     const [postsSize,setPostsSize]=useState(0);
-    const [likedPostLoading,setLikedPostLoading]=useState(null);
 
     useEffect(() => {
         setLoading(true);
@@ -49,93 +45,6 @@ const AllPosts = () => {
         setSkip(newSkip);
     }
 
-    const likePost = (id) => {
-        setLikedPostLoading(id);
-        fetch('/like', {
-            method: "put",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": "Bearer " + localStorage.getItem("jwt")
-            },
-            body: JSON.stringify({
-                postId: id
-            })
-        }).then(res => res.json())
-            .then(result => {
-                const newData = data.map(item => {
-                    if (item._id === result._id) {
-                        return result;
-                    }
-                    else {
-                        return item;
-                    }
-                })
-                setData(newData);
-                setLikedPostLoading(null);
-                console.log(newData);
-            }).catch(err => console.log(err))
-    }
-
-    const unlikePost = (id) => {
-        setLikedPostLoading(id);
-        fetch('/unlike', {
-            method: "put",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": "Bearer " + localStorage.getItem("jwt")
-            },
-            body: JSON.stringify({
-                postId: id
-            })
-        }).then(res => res.json())
-            .then(result => {
-                const newData = data.map(item => {
-                    if (item._id === result._id) {
-                        return result;
-                    }
-                    else {
-                        return item;
-                    }
-                })
-                setData(newData);
-                setLikedPostLoading(null);
-            }).catch(err => console.log(err))
-    }
-
-    const makeComment = (text, postId) => {
-        fetch('/comment', {
-            method: "put",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": "Bearer " + localStorage.getItem("jwt")
-            },
-            body: JSON.stringify({
-                postId,
-                text
-            })
-        })
-            .then(res => res.json())
-            .then(result => {
-                console.log(result);
-                const newData = data.map(item => {
-                    if (item._id === result._id) {
-                        return result;
-                    }
-                    else {
-                        return item;
-                    }
-                })
-                setData(newData);
-
-                var commentinput = document.getElementsByClassName(`cominput-${postId}`)[0]
-                commentinput.value = "";
-                commentinput.blur();
-            })
-            .catch(err => {
-                console.log(err);
-            })
-    }
-
     const deletePost = (postId) => {
         fetch(`/deletepost/${postId}`, {
             method: "delete",
@@ -146,73 +55,8 @@ const AllPosts = () => {
             .then(res => res.json())
             .then(result => {
                 console.log(result);
-                const newData = data.filter(item => {
-                    return item._id !== result._id;
-                })
-                setData(newData);
+                history.push('/');
                 M.toast({ html: "Deleted Post Successfully!", classes: "#43a047 green darken-1" });
-            })
-    }
-
-    const deleteComment = (postId, commentId) => {
-
-        fetch(`/deletecomment/${postId}/${commentId}`, {
-            method: "put",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: "Bearer " + localStorage.getItem("jwt")
-            },
-        })
-            .then((res) => res.json())
-            .then((result) => {
-                console.log(result);
-                const newData = data.map((item) => {
-                    if (item._id == result._id) {
-                        return result;
-                    }
-                    else {
-                        return item;
-                    }
-                });
-                setData(newData);
-            });
-    };
-
-    const followUser = (followId) => {
-        fetch('/follow', {
-            method: "put",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": "Bearer " + localStorage.getItem("jwt")
-            },
-            body: JSON.stringify({
-                followId: followId
-            })
-        })
-            .then(res => res.json())
-            .then(result => {
-                console.log(result);
-                dispatch({ type: "UPDATE", payload: { following: result.following, followers: result.followers } });
-                localStorage.setItem("user", JSON.stringify(result));
-            })
-    }
-
-    const unfollowUser = (followId) => {
-        fetch('/unfollow', {
-            method: "put",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": "Bearer " + localStorage.getItem("jwt")
-            },
-            body: JSON.stringify({
-                unfollowId: followId
-            })
-        })
-            .then(res => res.json())
-            .then(result => {
-                console.log(result);
-                dispatch({ type: "UPDATE", payload: { following: result.following, followers: result.followers } });
-                localStorage.setItem("user", JSON.stringify(result));
             })
     }
 
@@ -240,54 +84,13 @@ const AllPosts = () => {
 
                                         <CarouselSlider item={item} />
 
-                                        {
-                                        likedPostLoading===item._id ?
-                                        <div className="preloader-wrapper small active" style={{width:"24px",height:"24px"}}>
-                                            <div className="spinner-layer spinner-blue-only">
-                                                <div className="circle-clipper left">
-                                                    <div className="circle"></div>
-                                                </div><div className="gap-patch">
-                                                    <div className="circle"></div>
-                                                </div><div className="circle-clipper right">
-                                                    <div className="circle"></div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        :
-                                        item.likes.find(record => record._id === state._id)
-                                            ? <i className="material-icons"
-                                                style={{ color: "red", cursor: "pointer" }}
-                                                onClick={() => { unlikePost(item._id) }}
-                                            >favorite</i>
-                                            : <i className="material-icons"
-                                                style={{ cursor: "pointer" }}
-                                                onClick={() => { likePost(item._id) }}
-                                            >favorite_border</i>
-                                        }
-
-                                        <LikesModal item={item} state={state} followUser={followUser} unfollowUser={unfollowUser} />
-
                                         <p><span style={{ fontWeight: "500" }}>{item.postedBy.username}</span> {item.caption}</p>
-
-                                        {item.comments.length > 0
-                                            ?
-                                            <div><CommentsModal item={item} state={state} deleteComment={deleteComment} />
-                                                <p style={{ textOverflow: "ellipsis", overflow: "hidden" }}><span style={{ fontWeight: "500", paddingRight: "3px" }}>{item.comments[item.comments.length - 1].postedBy.username}</span>{item.comments[item.comments.length - 1].text}</p></div>
-                                            : null
-                                        }
-
-                                        <textarea type="text" placeholder="Add a comment" className={`cominput-${item._id} stylized-input`}
-                                            onKeyDown={e => {
-                                                if (e.key === "Enter" && !e.shiftKey) {
-                                                    makeComment(e.target.value, item._id);
-                                                }
-                                            }}
-                                        />
+                  
 
                                     </div>
                                     <div className="card-reveal">
                                         <span className="card-title">Options<i className="material-icons right">close</i></span>
-                                        <HomePostOptions item={item} state={state} deletePost={deletePost} followUser={followUser} unfollowUser={unfollowUser} />
+                                
                                     </div>
                                 </div>
                             )

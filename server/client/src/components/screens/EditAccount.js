@@ -3,7 +3,7 @@ import { Link, useHistory } from 'react-router-dom';
 import M from 'materialize-css';
 import PreLoader from '../Preloader';
 
-const Signup = () => {
+const EditAccount = () => {
 
     const history = useHistory();
     const [email, setEmail] = useState("");
@@ -32,11 +32,43 @@ const Signup = () => {
             })
     }
     
-    useEffect(()=>{
-        if(url){
-            uploadFields();
+    useEffect(() => {       
+        if (urls) {
+            fetch(`/editaccount/${username}`, {
+                method: "get",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + localStorage.getItem("jwt")
+                },
+                body: JSON.stringify({
+                email,
+                username,
+                password,
+                profPic:url
+                })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    setLoading(false);
+                    console.log(data);
+                    setData(data.post);
+                    data.images.map((image) => addImage(image))
+                    setCaption(data.caption)
+                    
+                    if (data.error) {
+                        M.toast({ html: data.error, classes: "#c62828 red darken-1" });
+                    }
+                    else {
+                        M.toast({ html: "Saved account Settings", classes: "#43a047 green darken-1" });
+                        history.push('/');
+                    }
+                }).catch(err => {
+                    console.log(err);
+                })
         }
-    },[url])
+        
+    }, [urls])
+
 
     const uploadFields=()=>{
 
@@ -46,7 +78,7 @@ const Signup = () => {
             return;
         }
 
-        fetch("/signup", {
+        fetch(`/editaccount/${username}`, {
             method: "post",
             headers: {
                 "Content-Type": "application/json"
@@ -130,11 +162,8 @@ const Signup = () => {
                 <button className="btn waves-effect waves-light #1976d2 blue darken-1"
                     onClick={() => postData()}
                 >
-                    Sign Up
+                    Save Account Changes
                 </button>
-                <h6>
-                    <Link to="/signin">Already have an account?</Link>
-                </h6>
             </div>
 
             {loading ?
@@ -147,4 +176,4 @@ const Signup = () => {
     )
 }
 
-export default Signup
+export default EditAccount

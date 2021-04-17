@@ -72,6 +72,7 @@ router.put('/unfollow', requireLogin, (req, res) => {
     })
 })
 
+//route to update profile pic 
 router.put('/updateprofpic', requireLogin, (req, res) => {
     User.findByIdAndUpdate(req.user._id,
         { $set: { profPic: req.body.profPic } },
@@ -83,7 +84,6 @@ router.put('/updateprofpic', requireLogin, (req, res) => {
             res.json(result);
         })
 })
-
 router.post('/search-users', requireLogin, (req, res) => {
     let userPattern = new RegExp("^" + req.body.query);
     if (req.body.query !== "") {

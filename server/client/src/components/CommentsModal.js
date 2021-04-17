@@ -19,7 +19,7 @@ const CommentsModal = ({ item, state, deleteComment }) => {
                         item.comments.map((record) => {
                             return (
                                 <div className="row comment-row" key={record._id}>
-                                    <p className="col s10" style={{ wordWrap: "break-word",whiteSpace:"pre-wrap" }}>
+                                    <p className="col s10" style={{ wordWrap: "break-word" }}>
                                         <span style={{ fontWeight: "500", paddingRight: "3px" }}>
                                             <Link to={record.postedBy._id == state._id ? "/profile" : `/profile/${record.postedBy.username}`}>
 

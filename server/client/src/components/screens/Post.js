@@ -8,6 +8,7 @@ import CommentsModal from '../CommentsModal';
 import LikesModal from '../LikesModal';
 import { Link, useHistory, useParams } from 'react-router-dom';
 
+
 const Post = () => {
     const history = useHistory();
     const [data, setData] = useState();
@@ -29,6 +30,38 @@ const Post = () => {
     }, [])
 
 
+    const makeComment = (text, postId) => {
+        fetch('/comment', {
+            method: "put",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + localStorage.getItem("jwt")
+            },
+            body: JSON.stringify({
+                postId,
+                text
+            })
+        })
+            .then(res => res.json())
+            .then(result => {
+                console.log(result);
+                let newData = null;
+                if (data._id === result._id) {
+                    newData = result;
+                }
+                else {
+                    newData = data;
+                }
+                setData(newData);
+
+                var commentinput = document.getElementsByClassName(`cominput-${postId}`)[0]
+                commentinput.value = "";
+                commentinput.blur();
+
+            }).catch(err => {
+                console.log(err);
+            })
+    }
 
     const likePost = (id) => {
         fetch('/like', {
@@ -77,39 +110,6 @@ const Post = () => {
             }).catch(err => console.log(err))
     }
 
-    const makeComment = (text, postId) => {
-        fetch('/comment', {
-            method: "put",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": "Bearer " + localStorage.getItem("jwt")
-            },
-            body: JSON.stringify({
-                postId,
-                text
-            })
-        })
-            .then(res => res.json())
-            .then(result => {
-                console.log(result);
-                let newData = null;
-                if (data._id === result._id) {
-                    newData = result;
-                }
-                else {
-                    newData = data;
-                }
-                setData(newData);
-
-                var commentinput = document.getElementsByClassName(`cominput-${postId}`)[0]
-                commentinput.value = "";
-                commentinput.blur();
-
-            }).catch(err => {
-                console.log(err);
-            })
-    }
-
     const deletePost = (postId) => {
         fetch(`/deletepost/${postId}`, {
             method: "delete",
@@ -123,7 +123,7 @@ const Post = () => {
                 history.push('/');
                 M.toast({ html: "Deleted Post Successfully!", classes: "#43a047 green darken-1" });
             })
-    }
+        };
 
     const deleteComment = (postId, commentId) => {
 
@@ -167,6 +167,7 @@ const Post = () => {
             })
     }
 
+
     const unfollowUser = (followId) => {
         fetch('/unfollow', {
             method: "put",
@@ -189,7 +190,7 @@ const Post = () => {
 
     return (
         <div className="home">
-            
+
             {data ?
 
 
@@ -235,10 +236,11 @@ const Post = () => {
                             }}
                         />
 
+
                     </div>
                     <div className="card-reveal">
                         <span className="card-title">Options<i className="material-icons right">close</i></span>
-                        <HomePostOptions item={data} state={state} deletePost={deletePost} followUser={followUser} unfollowUser={unfollowUser} />
+
                     </div>
                 </div>
                 :

@@ -34,18 +34,6 @@ const EditAccountSettings = () => {
             return;
         }
 
-        if(oldPassword.length<6){
-            M.toast({ html: "Password cannot be less than 6 characters!", classes: "#c62828 red darken-1" });
-            setLoading(false);
-            return;
-        }   
-
-        if(password&&password.length<6){
-            M.toast({ html: "Password cannot be less than 6 characters!", classes: "#c62828 red darken-1" });
-            setLoading(false);
-            return;
-        }
-
         fetch("/editaccountsettings", {
             method: "put",
             headers: {

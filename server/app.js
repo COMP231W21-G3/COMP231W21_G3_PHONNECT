@@ -12,14 +12,12 @@ require('./models/user');
 require('./models/post');
 require('./models/chatroom');
 require('./models/chat');
-require('./models/servicerequest');
 
 app.use(express.json());
 app.use(require('./routes/auth'));
 app.use(require('./routes/post'));
 app.use(require('./routes/user'));
 app.use(require('./routes/chatroom'));
-app.use(require('./routes/servicerequest'));
 
 app.use(cors());
 app.options('*', cors());
@@ -57,10 +55,6 @@ io.use(socketioJwt.authorize({
     require('./routes/chatroom').createChatroomLive(socket, io);
     require('./routes/chatroom').openChatroomLive(socket, io);
     require('./routes/chatroom').addChatLive(socket, io);
-    require('./routes/chatroom').addParticipantsLive(socket, io);
-    require('./routes/chatroom').removeParticipantLive(socket, io);
-    require('./routes/chatroom').openVideoChatRoomLive(socket, io);
-    require('./routes/chatroom').closeVideoChatRoomLive(socket, io);
 
     return io;    
   });

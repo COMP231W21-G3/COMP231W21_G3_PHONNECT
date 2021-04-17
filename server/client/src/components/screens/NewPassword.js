@@ -15,13 +15,6 @@ const NewPassword = () => {
 
     const postData = () => {
         setLoading(true);
-
-        if(password.length<6){
-            M.toast({ html: "Password cannot be less than 6 characters!", classes: "#c62828 red darken-1" });
-            setLoading(false);
-            return;
-        }
-
         fetch("/new-password", {
             method: "post",
             headers: {

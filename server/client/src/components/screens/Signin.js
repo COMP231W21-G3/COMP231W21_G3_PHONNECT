@@ -77,9 +77,6 @@ const Signin = () => {
                 <h6>
                     <Link to="/signup">Don't have an account?</Link>
                 </h6>
-                <h6 style={{fontSize:"1em"}}>
-                    <Link to="/resetpassword">Forgot password?</Link>
-                </h6>
             </div>
 
             {loading ?
