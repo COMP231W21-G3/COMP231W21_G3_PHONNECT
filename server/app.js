@@ -20,6 +20,7 @@ app.use(require('./routes/post'));
 app.use(require('./routes/user'));
 app.use(require('./routes/chatroom'));
 app.use(require('./routes/servicerequest'));
+app.use(require('./routes/unittests'));
 
 app.use(cors());
 app.options('*', cors());
