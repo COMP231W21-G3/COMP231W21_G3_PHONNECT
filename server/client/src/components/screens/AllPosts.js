@@ -23,7 +23,7 @@ const AllPosts = () => {
     }, [])
 
     const getPosts = (variables) => {
-        fetch('/allposts', {
+        fetch('/allposts', { 
             method: "post",
             headers: {
                 "Content-Type": "application/json",
